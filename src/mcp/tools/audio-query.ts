@@ -6,7 +6,8 @@ export function registerAudioQueryTool(server: McpServer, defaultHost: string): 
   server.registerTool(
     "audio_query",
     {
-      description: "Get the audio query JSON for given text and speaker. The result can be modified and passed to the synthesize tool.",
+      description:
+        "Get the audio query JSON for given text and speaker. The result can be modified and passed to the synthesize tool.",
       inputSchema: {
         text: z.string().describe("Text to generate audio query for"),
         speaker: z.number().int().default(1).describe("Speaker ID"),

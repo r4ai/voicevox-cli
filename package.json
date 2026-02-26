@@ -1,15 +1,19 @@
 {
   "name": "voicevox-cli",
   "version": "0.1.0",
-  "type": "module",
   "bin": {
     "voicevox": "./dist/cli.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",
@@ -18,10 +22,13 @@
   },
   "devDependencies": {
     "@types/node": "latest",
+    "oxfmt": "^0.35.0",
     "tsup": "latest",
     "typescript": "latest"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

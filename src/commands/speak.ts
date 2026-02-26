@@ -60,11 +60,7 @@ export const speakCommand = define({
 
     if (shouldPlay) {
       const player =
-        process.platform === "darwin"
-          ? "afplay"
-          : process.platform === "win32"
-            ? "start"
-            : "aplay"
+        process.platform === "darwin" ? "afplay" : process.platform === "win32" ? "start" : "aplay"
       execSync(`${player} "${output}"`)
     }
   },

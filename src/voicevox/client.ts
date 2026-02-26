@@ -84,9 +84,7 @@ export class VoiceVoxClient {
   async deleteUserDictWord(wordUuid: string): Promise<void> {
     const res = await fetch(`${this.baseUrl}/user_dict_word/${wordUuid}`, { method: "DELETE" })
     if (!res.ok)
-      throw new Error(
-        `DELETE /user_dict_word/${wordUuid} failed: ${res.status} ${res.statusText}`,
-      )
+      throw new Error(`DELETE /user_dict_word/${wordUuid} failed: ${res.status} ${res.statusText}`)
   }
 
   async getAccentPhrases(text: string, speaker: number, isKana = false): Promise<AccentPhrase[]> {

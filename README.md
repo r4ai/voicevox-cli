@@ -32,12 +32,12 @@ voicevox speak "こんにちは" --speaker 3 --output hello.wav
 voicevox speak "こんにちは" --play   # 合成後に再生
 ```
 
-| オプション | 短縮形 | デフォルト | 説明 |
-| --- | --- | --- | --- |
-| `--speaker` | `-s` | `1` | スピーカー ID |
-| `--output` | `-o` | `output.wav` | 出力ファイルパス |
-| `--host` | | `http://localhost:50021` | VoiceVox Engine の URL |
-| `--play` | `-p` | `false` | 合成後に再生 |
+| オプション  | 短縮形 | デフォルト               | 説明                   |
+| ----------- | ------ | ------------------------ | ---------------------- |
+| `--speaker` | `-s`   | `1`                      | スピーカー ID          |
+| `--output`  | `-o`   | `output.wav`             | 出力ファイルパス       |
+| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL |
+| `--play`    | `-p`   | `false`                  | 合成後に再生           |
 
 ### `voicevox speakers`
 
@@ -48,10 +48,10 @@ voicevox speakers
 voicevox speakers --json   # JSON で出力
 ```
 
-| オプション | デフォルト | 説明 |
-| --- | --- | --- |
-| `--host` | `http://localhost:50021` | VoiceVox Engine の URL |
-| `--json` | `false` | JSON で出力 |
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
+| `--json`   | `false`                  | JSON で出力            |
 
 ### `voicevox query <text>`
 
@@ -62,10 +62,10 @@ voicevox query "こんにちは"
 voicevox query "こんにちは" --speaker 3
 ```
 
-| オプション | 短縮形 | デフォルト | 説明 |
-| --- | --- | --- | --- |
-| `--speaker` | `-s` | `1` | スピーカー ID |
-| `--host` | | `http://localhost:50021` | VoiceVox Engine の URL |
+| オプション  | 短縮形 | デフォルト               | 説明                   |
+| ----------- | ------ | ------------------------ | ---------------------- |
+| `--speaker` | `-s`   | `1`                      | スピーカー ID          |
+| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL |
 
 ### `voicevox accent-phrases <text>`
 
@@ -77,11 +77,11 @@ voicevox accent-phrases "こんにちは" --speaker 3
 voicevox accent-phrases "コンニチワ" --is-kana
 ```
 
-| オプション | 短縮形 | デフォルト | 説明 |
-| --- | --- | --- | --- |
-| `--speaker` | `-s` | `1` | スピーカー ID |
-| `--is-kana` | | `false` | テキストがカナかどうか |
-| `--host` | | `http://localhost:50021` | VoiceVox Engine の URL |
+| オプション  | 短縮形 | デフォルト               | 説明                   |
+| ----------- | ------ | ------------------------ | ---------------------- |
+| `--speaker` | `-s`   | `1`                      | スピーカー ID          |
+| `--is-kana` |        | `false`                  | テキストがカナかどうか |
+| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL |
 
 ### `voicevox dict`
 
@@ -98,30 +98,30 @@ voicevox dict import <file.json>       # JSON ファイルからインポート
 
 #### `voicevox dict add <surface> <pronunciation>`
 
-| オプション | 短縮形 | デフォルト | 説明 |
-| --- | --- | --- | --- |
-| `--accent-type` | `-a` | `0` | アクセント型 |
-| `--word-type` | `-t` | `COMMON_NOUN` | 品詞 (`PROPER_NOUN` / `COMMON_NOUN` / `VERB` / `ADJECTIVE` / `SUFFIX`) |
-| `--priority` | `-p` | `5` | 優先度 (0–10) |
-| `--host` | | `http://localhost:50021` | VoiceVox Engine の URL |
+| オプション      | 短縮形 | デフォルト               | 説明                                                                   |
+| --------------- | ------ | ------------------------ | ---------------------------------------------------------------------- |
+| `--accent-type` | `-a`   | `0`                      | アクセント型                                                           |
+| `--word-type`   | `-t`   | `COMMON_NOUN`            | 品詞 (`PROPER_NOUN` / `COMMON_NOUN` / `VERB` / `ADJECTIVE` / `SUFFIX`) |
+| `--priority`    | `-p`   | `5`                      | 優先度 (0–10)                                                          |
+| `--host`        |        | `http://localhost:50021` | VoiceVox Engine の URL                                                 |
 
 #### `voicevox dict update <uuid>`
 
-| オプション | 短縮形 | 説明 |
-| --- | --- | --- |
-| `--surface` | `-s` | 表層形 |
-| `--pronunciation` | `-r` | 読み (カタカナ) |
-| `--accent-type` | `-a` | アクセント型 |
-| `--word-type` | `-t` | 品詞 |
-| `--priority` | `-p` | 優先度 (0–10) |
-| `--host` | | VoiceVox Engine の URL |
+| オプション        | 短縮形 | 説明                   |
+| ----------------- | ------ | ---------------------- |
+| `--surface`       | `-s`   | 表層形                 |
+| `--pronunciation` | `-r`   | 読み (カタカナ)        |
+| `--accent-type`   | `-a`   | アクセント型           |
+| `--word-type`     | `-t`   | 品詞                   |
+| `--priority`      | `-p`   | 優先度 (0–10)          |
+| `--host`          |        | VoiceVox Engine の URL |
 
 #### `voicevox dict import <file>`
 
-| オプション | 短縮形 | デフォルト | 説明 |
-| --- | --- | --- | --- |
-| `--override` | `-f` | `false` | 既存エントリを上書き |
-| `--host` | | `http://localhost:50021` | VoiceVox Engine の URL |
+| オプション   | 短縮形 | デフォルト               | 説明                   |
+| ------------ | ------ | ------------------------ | ---------------------- |
+| `--override` | `-f`   | `false`                  | 既存エントリを上書き   |
+| `--host`     |        | `http://localhost:50021` | VoiceVox Engine の URL |
 
 ### `voicevox mcp`
 
@@ -136,19 +136,19 @@ voicevox mcp --host http://localhost:50021
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
 
-| ツール名 | 説明 |
-| --- | --- |
-| `list_speakers` | 利用可能なスピーカーの一覧を返す |
-| `audio_query` | テキストの AudioQuery JSON を返す |
-| `synthesize` | テキストを音声合成して WAV ファイルを保存し、パスを返す |
-| `get_accent_phrases` | テキストからアクセント句を取得する |
-| `get_mora_data` | アクセント句から音素の長さと音高を取得する |
-| `get_mora_length` | アクセント句から音素の長さを取得する |
-| `get_mora_pitch` | アクセント句から音高を取得する |
-| `get_user_dict` | ユーザー辞書の全単語を返す |
-| `add_user_dict_word` | ユーザー辞書に単語を追加する |
-| `update_user_dict_word` | ユーザー辞書の単語を更新する |
-| `delete_user_dict_word` | ユーザー辞書の単語を削除する |
+| ツール名                | 説明                                                    |
+| ----------------------- | ------------------------------------------------------- |
+| `list_speakers`         | 利用可能なスピーカーの一覧を返す                        |
+| `audio_query`           | テキストの AudioQuery JSON を返す                       |
+| `synthesize`            | テキストを音声合成して WAV ファイルを保存し、パスを返す |
+| `get_accent_phrases`    | テキストからアクセント句を取得する                      |
+| `get_mora_data`         | アクセント句から音素の長さと音高を取得する              |
+| `get_mora_length`       | アクセント句から音素の長さを取得する                    |
+| `get_mora_pitch`        | アクセント句から音高を取得する                          |
+| `get_user_dict`         | ユーザー辞書の全単語を返す                              |
+| `add_user_dict_word`    | ユーザー辞書に単語を追加する                            |
+| `update_user_dict_word` | ユーザー辞書の単語を更新する                            |
+| `delete_user_dict_word` | ユーザー辞書の単語を削除する                            |
 
 ### Claude Desktop への設定例
 

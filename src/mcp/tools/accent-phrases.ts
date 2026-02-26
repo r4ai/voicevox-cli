@@ -93,7 +93,8 @@ export function registerAccentPhraseTools(server: McpServer, defaultHost: string
   server.registerTool(
     "get_mora_length",
     {
-      description: "Get mora phoneme lengths for accent phrases. Updates consonant and vowel length values.",
+      description:
+        "Get mora phoneme lengths for accent phrases. Updates consonant and vowel length values.",
       inputSchema: {
         accent_phrases: ACCENT_PHRASES_SCHEMA,
         speaker: z.number().int().default(1).describe("Speaker ID"),

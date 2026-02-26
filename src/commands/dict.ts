@@ -191,7 +191,9 @@ const dictImportCommand = define({
       const raw = await readFile(file, "utf-8")
       dictData = JSON.parse(raw)
     } catch (err) {
-      console.error(`Error: Failed to read file: ${err instanceof Error ? err.message : String(err)}`)
+      console.error(
+        `Error: Failed to read file: ${err instanceof Error ? err.message : String(err)}`,
+      )
       process.exit(1)
     }
 

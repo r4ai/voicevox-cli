@@ -9,7 +9,8 @@ export function registerSynthesizeTool(server: McpServer, defaultHost: string): 
   server.registerTool(
     "synthesize",
     {
-      description: "Synthesize Japanese text to speech and save it as a WAV file. Returns the output file path.",
+      description:
+        "Synthesize Japanese text to speech and save it as a WAV file. Returns the output file path.",
       inputSchema: {
         text: z.string().describe("Text to synthesize"),
         speaker: z.number().int().default(1).describe("Speaker ID"),
