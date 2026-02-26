@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
+import { registerAccentPhraseTools } from "./tools/accent-phrases.js"
 import { registerAudioQueryTool } from "./tools/audio-query.js"
 import { registerListSpeakersTool } from "./tools/list-speakers.js"
 import { registerSynthesizeTool } from "./tools/synthesize.js"
@@ -13,6 +14,7 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerListSpeakersTool(server, defaultHost)
   registerAudioQueryTool(server, defaultHost)
   registerSynthesizeTool(server, defaultHost)
+  registerAccentPhraseTools(server, defaultHost)
   registerUserDictTools(server, defaultHost)
 
   return server

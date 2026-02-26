@@ -1,4 +1,4 @@
-import type { AudioQuery, Speaker, UserDictWord } from "./types.js"
+import type { AccentPhrase, AudioQuery, Speaker, UserDictWord } from "./types.js"
 
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
@@ -87,6 +87,52 @@ export class VoiceVoxClient {
       throw new Error(
         `DELETE /user_dict_word/${wordUuid} failed: ${res.status} ${res.statusText}`,
       )
+  }
+
+  async getAccentPhrases(text: string, speaker: number, isKana = false): Promise<AccentPhrase[]> {
+    const url = new URL(`${this.baseUrl}/accent_phrases`)
+    url.searchParams.set("text", text)
+    url.searchParams.set("speaker", String(speaker))
+    url.searchParams.set("is_kana", String(isKana))
+    const res = await fetch(url, { method: "POST" })
+    if (!res.ok) throw new Error(`POST /accent_phrases failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<AccentPhrase[]>
+  }
+
+  async getMoraData(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+    const url = new URL(`${this.baseUrl}/mora_data`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(accentPhrases),
+    })
+    if (!res.ok) throw new Error(`POST /mora_data failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<AccentPhrase[]>
+  }
+
+  async getMoraLength(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+    const url = new URL(`${this.baseUrl}/mora_length`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(accentPhrases),
+    })
+    if (!res.ok) throw new Error(`POST /mora_length failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<AccentPhrase[]>
+  }
+
+  async getMoraPitch(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+    const url = new URL(`${this.baseUrl}/mora_pitch`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(accentPhrases),
+    })
+    if (!res.ok) throw new Error(`POST /mora_pitch failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<AccentPhrase[]>
   }
 
   async importUserDict(dictData: Record<string, UserDictWord>, override: boolean): Promise<void> {
