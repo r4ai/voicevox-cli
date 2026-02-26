@@ -1,4 +1,5 @@
 import { define } from "gunshi"
+import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
 
 export const queryCommand = define({
@@ -28,7 +29,14 @@ export const queryCommand = define({
     const speaker = ctx.values.speaker ?? 1
     const host = ctx.values.host ?? "http://localhost:50021"
     const client = new VoiceVoxClient(host)
-    const query = await client.createAudioQuery(text, speaker)
+
+    let query
+    try {
+      query = await client.createAudioQuery(text, speaker)
+    } catch (err) {
+      handleCommandError(err, host)
+    }
+
     console.log(JSON.stringify(query, null, 2))
   },
 })

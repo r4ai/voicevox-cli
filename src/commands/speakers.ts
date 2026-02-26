@@ -1,4 +1,5 @@
 import { define } from "gunshi"
+import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
 
 export const speakersCommand = define({
@@ -20,7 +21,13 @@ export const speakersCommand = define({
     const host = ctx.values.host ?? "http://localhost:50021"
     const asJson = ctx.values.json ?? false
     const client = new VoiceVoxClient(host)
-    const speakers = await client.getSpeakers()
+
+    let speakers
+    try {
+      speakers = await client.getSpeakers()
+    } catch (err) {
+      handleCommandError(err, host)
+    }
 
     if (asJson) {
       console.log(JSON.stringify(speakers, null, 2))

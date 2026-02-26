@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process"
 import { writeFile } from "node:fs/promises"
 import { define } from "gunshi"
+import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
 
 export const speakCommand = define({
@@ -45,8 +46,14 @@ export const speakCommand = define({
     const shouldPlay = ctx.values.play ?? false
 
     const client = new VoiceVoxClient(host)
-    const query = await client.createAudioQuery(text, speaker)
-    const wav = await client.synthesize(query, speaker)
+
+    let wav
+    try {
+      const query = await client.createAudioQuery(text, speaker)
+      wav = await client.synthesize(query, speaker)
+    } catch (err) {
+      handleCommandError(err, host)
+    }
 
     await writeFile(output, Buffer.from(wav))
     console.log(`Saved: ${output}`)
