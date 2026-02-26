@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "latest",
+    "lefthook": "^2.1.1",
     "oxfmt": "^0.35.0",
     "oxlint": "^1.50.0",
     "tsup": "latest",
@@ -31,7 +32,8 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "lefthook"
     ]
   }
 }

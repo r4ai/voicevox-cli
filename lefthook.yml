@@ -1,0 +1,5 @@
+pre-commit:
+  jobs:
+    - name: fmt & lint
+      run: pnpm fmt && pnpm lint:fix
+      stage_fixed: true
