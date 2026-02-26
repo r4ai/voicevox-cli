@@ -32,12 +32,13 @@ voicevox speak "こんにちは" --speaker 3 --output hello.wav
 voicevox speak "こんにちは" --play   # 合成後に再生
 ```
 
-| オプション  | 短縮形 | デフォルト               | 説明                   |
-| ----------- | ------ | ------------------------ | ---------------------- |
-| `--speaker` | `-s`   | `1`                      | スピーカー ID          |
-| `--output`  | `-o`   | `output.wav`             | 出力ファイルパス       |
-| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL |
-| `--play`    | `-p`   | `false`                  | 合成後に再生           |
+| オプション  | 短縮形 | デフォルト               | 説明                                  |
+| ----------- | ------ | ------------------------ | ------------------------------------- |
+| `--speaker` | `-s`   | `1`                      | スピーカー ID                         |
+| `--preset`  |        |                          | プリセット ID（`--speaker` より優先） |
+| `--output`  | `-o`   | `output.wav`             | 出力ファイルパス                      |
+| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL                |
+| `--play`    | `-p`   | `false`                  | 合成後に再生                          |
 
 ### `voicevox speakers`
 
@@ -123,6 +124,48 @@ voicevox dict import <file.json>       # JSON ファイルからインポート
 | `--override` | `-f`   | `false`                  | 既存エントリを上書き   |
 | `--host`     |        | `http://localhost:50021` | VoiceVox Engine の URL |
 
+### `voicevox presets`
+
+プリセットを管理します。
+
+```bash
+voicevox presets                    # プリセット一覧を表示
+voicevox presets --json             # JSON で出力
+voicevox presets add --name <name> --speaker-uuid <uuid> [options]
+voicevox presets update <id> [options]
+voicevox presets delete <id>
+```
+
+#### `voicevox presets add`
+
+| オプション              | 短縮形 | デフォルト               | 説明                    |
+| ----------------------- | ------ | ------------------------ | ----------------------- |
+| `--name`                | `-n`   |                          | プリセット名（必須）    |
+| `--speaker-uuid`        | `-u`   |                          | スピーカー UUID（必須） |
+| `--style-id`            | `-s`   | `0`                      | スタイル ID             |
+| `--speed`               |        | `1.0`                    | 話速                    |
+| `--pitch`               |        | `0.0`                    | 音高                    |
+| `--intonation`          |        | `1.0`                    | 抑揚                    |
+| `--volume`              |        | `1.0`                    | 音量                    |
+| `--pre-phoneme-length`  |        | `0.1`                    | 開始無音時間            |
+| `--post-phoneme-length` |        | `0.1`                    | 終了無音時間            |
+| `--host`                |        | `http://localhost:50021` | VoiceVox Engine の URL  |
+
+#### `voicevox presets update <id>`
+
+| オプション              | 短縮形 | 説明                   |
+| ----------------------- | ------ | ---------------------- |
+| `--name`                | `-n`   | プリセット名           |
+| `--speaker-uuid`        | `-u`   | スピーカー UUID        |
+| `--style-id`            | `-s`   | スタイル ID            |
+| `--speed`               |        | 話速                   |
+| `--pitch`               |        | 音高                   |
+| `--intonation`          |        | 抑揚                   |
+| `--volume`              |        | 音量                   |
+| `--pre-phoneme-length`  |        | 開始無音時間           |
+| `--post-phoneme-length` |        | 終了無音時間           |
+| `--host`                |        | VoiceVox Engine の URL |
+
 ### `voicevox mcp`
 
 MCP サーバーを stdio モードで起動します。
@@ -136,19 +179,21 @@ voicevox mcp --host http://localhost:50021
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
 
-| ツール名                | 説明                                                    |
-| ----------------------- | ------------------------------------------------------- |
-| `list_speakers`         | 利用可能なスピーカーの一覧を返す                        |
-| `audio_query`           | テキストの AudioQuery JSON を返す                       |
-| `synthesize`            | テキストを音声合成して WAV ファイルを保存し、パスを返す |
-| `get_accent_phrases`    | テキストからアクセント句を取得する                      |
-| `get_mora_data`         | アクセント句から音素の長さと音高を取得する              |
-| `get_mora_length`       | アクセント句から音素の長さを取得する                    |
-| `get_mora_pitch`        | アクセント句から音高を取得する                          |
-| `get_user_dict`         | ユーザー辞書の全単語を返す                              |
-| `add_user_dict_word`    | ユーザー辞書に単語を追加する                            |
-| `update_user_dict_word` | ユーザー辞書の単語を更新する                            |
-| `delete_user_dict_word` | ユーザー辞書の単語を削除する                            |
+| ツール名                         | 説明                                                    |
+| -------------------------------- | ------------------------------------------------------- |
+| `list_speakers`                  | 利用可能なスピーカーの一覧を返す                        |
+| `audio_query`                    | テキストの AudioQuery JSON を返す                       |
+| `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す |
+| `get_accent_phrases`             | テキストからアクセント句を取得する                      |
+| `get_mora_data`                  | アクセント句から音素の長さと音高を取得する              |
+| `get_mora_length`                | アクセント句から音素の長さを取得する                    |
+| `get_mora_pitch`                 | アクセント句から音高を取得する                          |
+| `get_user_dict`                  | ユーザー辞書の全単語を返す                              |
+| `add_user_dict_word`             | ユーザー辞書に単語を追加する                            |
+| `update_user_dict_word`          | ユーザー辞書の単語を更新する                            |
+| `delete_user_dict_word`          | ユーザー辞書の単語を削除する                            |
+| `list_presets`                   | プリセット一覧を返す                                    |
+| `create_audio_query_from_preset` | プリセットを使って AudioQuery を作成する                |
 
 ### Claude Desktop への設定例
 

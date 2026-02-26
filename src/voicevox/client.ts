@@ -1,4 +1,4 @@
-import type { AccentPhrase, AudioQuery, Speaker, UserDictWord } from "./types.js"
+import type { AccentPhrase, AudioQuery, Preset, Speaker, UserDictWord } from "./types.js"
 
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
@@ -131,6 +131,49 @@ export class VoiceVoxClient {
     })
     if (!res.ok) throw new Error(`POST /mora_pitch failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<AccentPhrase[]>
+  }
+
+  async getPresets(): Promise<Preset[]> {
+    const res = await fetch(`${this.baseUrl}/presets`)
+    if (!res.ok) throw new Error(`GET /presets failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<Preset[]>
+  }
+
+  async addPreset(preset: Omit<Preset, "id">): Promise<number> {
+    const res = await fetch(`${this.baseUrl}/add_preset`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(preset),
+    })
+    if (!res.ok) throw new Error(`POST /add_preset failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<number>
+  }
+
+  async updatePreset(preset: Preset): Promise<number> {
+    const res = await fetch(`${this.baseUrl}/update_preset`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(preset),
+    })
+    if (!res.ok) throw new Error(`POST /update_preset failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<number>
+  }
+
+  async deletePreset(presetId: number): Promise<void> {
+    const url = new URL(`${this.baseUrl}/delete_preset`)
+    url.searchParams.set("id", String(presetId))
+    const res = await fetch(url, { method: "POST" })
+    if (!res.ok) throw new Error(`POST /delete_preset failed: ${res.status} ${res.statusText}`)
+  }
+
+  async createAudioQueryFromPreset(text: string, presetId: number): Promise<AudioQuery> {
+    const url = new URL(`${this.baseUrl}/audio_query_from_preset`)
+    url.searchParams.set("text", text)
+    url.searchParams.set("preset_id", String(presetId))
+    const res = await fetch(url, { method: "POST" })
+    if (!res.ok)
+      throw new Error(`POST /audio_query_from_preset failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<AudioQuery>
   }
 
   async importUserDict(dictData: Record<string, UserDictWord>, override: boolean): Promise<void> {

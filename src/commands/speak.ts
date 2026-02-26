@@ -31,6 +31,10 @@ export const speakCommand = define({
       default: false,
       description: "Play audio after synthesis",
     },
+    preset: {
+      type: "number",
+      description: "Preset ID (use preset instead of --speaker)",
+    },
   },
   run: async (ctx) => {
     const text = ctx.positionals[0]
@@ -44,13 +48,25 @@ export const speakCommand = define({
     const output = ctx.values.output ?? "output.wav"
     const host = ctx.values.host ?? "http://localhost:50021"
     const shouldPlay = ctx.values.play ?? false
+    const presetId = ctx.values.preset
 
     const client = new VoiceVoxClient(host)
 
     let wav
     try {
-      const query = await client.createAudioQuery(text, speaker)
-      wav = await client.synthesize(query, speaker)
+      if (presetId !== undefined) {
+        const presets = await client.getPresets()
+        const preset = presets.find((p) => p.id === presetId)
+        if (!preset) {
+          console.error(`Error: preset with id ${presetId} not found`)
+          process.exit(1)
+        }
+        const query = await client.createAudioQueryFromPreset(text, presetId)
+        wav = await client.synthesize(query, preset.style_id)
+      } else {
+        const query = await client.createAudioQuery(text, speaker)
+        wav = await client.synthesize(query, speaker)
+      }
     } catch (err) {
       handleCommandError(err, host)
     }
