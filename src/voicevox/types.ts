@@ -39,3 +39,14 @@ export interface AudioQuery {
   outputStereo: boolean
   kana?: string
 }
+
+export type WordType = "PROPER_NOUN" | "COMMON_NOUN" | "VERB" | "ADJECTIVE" | "SUFFIX"
+
+export interface UserDictWord {
+  surface: string
+  pronunciation: string
+  accent_type: number
+  word_type: WordType
+  priority: number
+  mora_count?: number
+}

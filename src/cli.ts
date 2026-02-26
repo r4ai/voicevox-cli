@@ -1,4 +1,5 @@
 import { cli, define } from "gunshi"
+import { dictCommand } from "./commands/dict.js"
 import { mcpCommand } from "./commands/mcp.js"
 import { queryCommand } from "./commands/query.js"
 import { speakCommand } from "./commands/speak.js"
@@ -17,6 +18,7 @@ await cli(process.argv.slice(2), entryCommand, {
     speak: speakCommand,
     speakers: speakersCommand,
     query: queryCommand,
+    dict: dictCommand,
     mcp: mcpCommand,
   },
 })
