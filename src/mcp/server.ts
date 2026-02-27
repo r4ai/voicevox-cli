@@ -5,6 +5,7 @@ import { registerEngineInfoTool } from "./tools/engine-info.js"
 import { registerListSpeakersTool } from "./tools/list-speakers.js"
 import { registerPresetTools } from "./tools/presets.js"
 import { registerSettingTools } from "./tools/setting.js"
+import { registerSpeakerInfoTool } from "./tools/speaker-info.js"
 import { registerSynthesizeTool } from "./tools/synthesize.js"
 import { registerUserDictTools } from "./tools/user-dict.js"
 import { registerUtilityTools } from "./tools/utilities.js"
@@ -16,6 +17,7 @@ export function createMcpServer(defaultHost: string): McpServer {
   })
 
   registerListSpeakersTool(server, defaultHost)
+  registerSpeakerInfoTool(server, defaultHost)
   registerAudioQueryTool(server, defaultHost)
   registerSynthesizeTool(server, defaultHost)
   registerAccentPhraseTools(server, defaultHost)

@@ -54,6 +54,20 @@ voicevox speakers --json   # JSON で出力
 | `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
 | `--json`   | `false`                  | JSON で出力            |
 
+### `voicevox speaker-info <uuid>`
+
+スピーカーの詳細情報（利用ポリシー・アイコン・音声サンプル）を表示します。
+
+```bash
+voicevox speaker-info <speaker-uuid>
+voicevox speaker-info <speaker-uuid> --json   # JSON で出力
+```
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
+| `--json`   | `false`                  | JSON で出力            |
+
 ### `voicevox query <text>`
 
 テキストの AudioQuery JSON を表示します。
@@ -260,6 +274,7 @@ voicevox mcp --host http://localhost:50021
 | ツール名                         | 説明                                                                 |
 | -------------------------------- | -------------------------------------------------------------------- |
 | `list_speakers`                  | 利用可能なスピーカーの一覧を返す                                     |
+| `get_speaker_info`               | スピーカーの詳細情報（ポリシー・アイコン・音声サンプル）を取得する   |
 | `audio_query`                    | テキストの AudioQuery JSON を返す                                    |
 | `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す              |
 | `get_accent_phrases`             | テキストからアクセント句を取得する                                   |
