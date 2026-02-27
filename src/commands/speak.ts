@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises"
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 export const speakCommand = define({
   name: "speak",
@@ -45,7 +46,7 @@ export const speakCommand = define({
     },
   },
   run: async (ctx) => {
-    const text = ctx.positionals[0]
+    const text = getPositionals(ctx)[0]
     if (!text) {
       console.error("Error: text argument is required")
       console.error("Usage: voicevox speak <text> [options]")

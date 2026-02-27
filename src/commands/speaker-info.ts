@@ -1,6 +1,7 @@
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 export const speakerInfoCommand = define({
   name: "speaker-info",
@@ -18,7 +19,7 @@ export const speakerInfoCommand = define({
     },
   },
   run: async (ctx) => {
-    const uuid = ctx.positionals[0]
+    const uuid = getPositionals(ctx)[0]
     if (!uuid) {
       console.error("Error: speaker UUID is required")
       process.exit(1)

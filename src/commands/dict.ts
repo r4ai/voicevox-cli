@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises"
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 const HOST_ARG = {
   host: {
@@ -36,8 +37,8 @@ const dictAddCommand = define({
     },
   },
   run: async (ctx) => {
-    const surface = ctx.positionals[0]
-    const pronunciation = ctx.positionals[1]
+    const surface = getPositionals(ctx)[0]
+    const pronunciation = getPositionals(ctx)[1]
     if (!surface || !pronunciation) {
       console.error("Error: surface and pronunciation arguments are required")
       console.error("Usage: voicevox dict add <surface> <pronunciation> [options]")
@@ -96,7 +97,7 @@ const dictUpdateCommand = define({
     },
   },
   run: async (ctx) => {
-    const wordUuid = ctx.positionals[0]
+    const wordUuid = getPositionals(ctx)[0]
     if (!wordUuid) {
       console.error("Error: uuid argument is required")
       console.error("Usage: voicevox dict update <uuid> [options]")
@@ -142,7 +143,7 @@ const dictDeleteCommand = define({
     ...HOST_ARG,
   },
   run: async (ctx) => {
-    const wordUuid = ctx.positionals[0]
+    const wordUuid = getPositionals(ctx)[0]
     if (!wordUuid) {
       console.error("Error: uuid argument is required")
       console.error("Usage: voicevox dict delete <uuid>")
@@ -175,7 +176,7 @@ const dictImportCommand = define({
     },
   },
   run: async (ctx) => {
-    const file = ctx.positionals[0]
+    const file = getPositionals(ctx)[0]
     if (!file) {
       console.error("Error: file argument is required")
       console.error("Usage: voicevox dict import <file> [options]")

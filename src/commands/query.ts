@@ -1,6 +1,7 @@
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 export const queryCommand = define({
   name: "query",
@@ -19,7 +20,7 @@ export const queryCommand = define({
     },
   },
   run: async (ctx) => {
-    const text = ctx.positionals[0]
+    const text = getPositionals(ctx)[0]
     if (!text) {
       console.error("Error: text argument is required")
       console.error("Usage: voicevox query <text> [options]")

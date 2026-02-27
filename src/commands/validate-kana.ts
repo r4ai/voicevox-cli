@@ -1,6 +1,7 @@
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 export const validateKanaCommand = define({
   name: "validate-kana",
@@ -13,7 +14,7 @@ export const validateKanaCommand = define({
     },
   },
   run: async (ctx) => {
-    const text = ctx.positionals[0]
+    const text = getPositionals(ctx)[0]
     if (!text) {
       console.error("Error: text argument is required")
       console.error("Usage: voicevox validate-kana <text>")
