@@ -25,6 +25,7 @@ await cli(process.argv.slice(2), entryCommand, {
   name: "voicevox",
   version: process.env.PKG_VERSION ?? "0.0.0",
   description: "VoiceVox CLI — synthesize Japanese text to speech",
+  renderHeader: null,
   subCommands: {
     speak: speakCommand,
     speakers: speakersCommand,
