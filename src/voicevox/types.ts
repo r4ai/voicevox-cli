@@ -153,3 +153,41 @@ export interface EngineSetting {
   cors_policy_mode: CorsPolicyMode
   allow_origin: string | null
 }
+
+export interface Note {
+  id?: string
+  key: number | null
+  frame_length: number
+  lyric: string
+}
+
+export interface Tempo {
+  position: number
+  bpm: number
+}
+
+export interface TimeSignature {
+  measure_count: number
+  beat_type: number
+  beats: number
+}
+
+export interface Score {
+  notes: Note[]
+  tempos: Tempo[]
+  time_signatures: TimeSignature[]
+}
+
+export interface FramePhoneme {
+  phoneme: string
+  frame_length: number
+}
+
+export interface FrameAudioQuery {
+  f0: number[]
+  volume: number[]
+  phonemes: FramePhoneme[]
+  volumeScale: number
+  outputSamplingRate: number
+  outputStereo: boolean
+}

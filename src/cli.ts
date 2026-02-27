@@ -9,6 +9,7 @@ import { morphableTargetsCommand } from "./commands/morphable-targets.js"
 import { presetsCommand } from "./commands/presets.js"
 import { queryCommand } from "./commands/query.js"
 import { settingCommand } from "./commands/setting.js"
+import { singersCommand } from "./commands/singers.js"
 import { speakCommand } from "./commands/speak.js"
 import { speakerInfoCommand } from "./commands/speaker-info.js"
 import { speakersCommand } from "./commands/speakers.js"
@@ -27,6 +28,7 @@ await cli(process.argv.slice(2), entryCommand, {
   subCommands: {
     speak: speakCommand,
     speakers: speakersCommand,
+    singers: singersCommand,
     "speaker-info": speakerInfoCommand,
     "initialize-speaker": initializeSpeakerCommand,
     "is-initialized-speaker": isInitializedSpeakerCommand,

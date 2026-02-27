@@ -183,6 +183,136 @@ describe("VoiceVoxClient.getSetting", () => {
   })
 })
 
+describe("VoiceVoxClient.getSingerInfo", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("GETs /singer_info with speaker_uuid query param", async () => {
+    const mockInfo = { portrait: "base64data", style_infos: [] }
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify(mockInfo), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.getSingerInfo("test-uuid")
+    expect(result).toEqual(mockInfo)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/singer_info")
+    expect(calledUrl).toContain("speaker_uuid=test-uuid")
+  })
+
+  it("includes resource_format query param when provided", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await client.getSingerInfo("test-uuid", "url")
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("resource_format=url")
+  })
+
+  it("throws on non-200 status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 404, statusText: "Not Found" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSingerInfo("bad-uuid")).rejects.toThrow("GET /singer_info failed: 404")
+  })
+})
+
+describe("VoiceVoxClient.getSingFrameF0", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockScore = {
+    notes: [{ key: 60, frame_length: 10, lyric: "ど" }],
+    tempos: [{ position: 0, bpm: 120 }],
+    time_signatures: [{ measure_count: 1, beat_type: 4, beats: 4 }],
+  }
+
+  it("POSTs to /sing_frame_f0 with speaker query param and score as body", async () => {
+    const mockF0 = [440.0, 440.0, 0.0]
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify(mockF0), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.getSingFrameF0(mockScore, 6000)
+    expect(result).toEqual(mockF0)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/sing_frame_f0")
+    expect(calledUrl).toContain("speaker=6000")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(mockScore),
+      }),
+    )
+  })
+
+  it("throws on non-200 status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSingFrameF0(mockScore, 6000)).rejects.toThrow(
+      "POST /sing_frame_f0 failed: 422",
+    )
+  })
+})
+
+describe("VoiceVoxClient.getSingFrameVolume", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockScore = {
+    notes: [{ key: 60, frame_length: 10, lyric: "ど" }],
+    tempos: [{ position: 0, bpm: 120 }],
+    time_signatures: [{ measure_count: 1, beat_type: 4, beats: 4 }],
+  }
+
+  const mockQuery = {
+    f0: [440.0],
+    volume: [1.0],
+    phonemes: [{ phoneme: "d", frame_length: 5 }],
+    volumeScale: 1.0,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /sing_frame_volume with speaker query param and {score, frame_audio_query} as body", async () => {
+    const mockVolume = [0.8, 0.9, 0.7]
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify(mockVolume), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.getSingFrameVolume(mockScore, 6000, mockQuery)
+    expect(result).toEqual(mockVolume)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/sing_frame_volume")
+    expect(calledUrl).toContain("speaker=6000")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ score: mockScore, frame_audio_query: mockQuery }),
+      }),
+    )
+  })
+
+  it("throws on non-200 status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSingFrameVolume(mockScore, 6000, mockQuery)).rejects.toThrow(
+      "POST /sing_frame_volume failed: 422",
+    )
+  })
+})
+
 describe("VoiceVoxClient.updateSetting", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
