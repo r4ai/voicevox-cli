@@ -1,0 +1,57 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g., v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: ./.github/actions/setup-node-pnpm
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$ ]]; then
+            echo "Invalid tag format: '$tag' (expected v<semver>)" >&2
+            exit 1
+          fi
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify package.json version matches tag
+        run: |
+          package_version=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+          tag_version="${{ steps.version.outputs.version }}"
+          if [ "$package_version" != "$tag_version" ]; then
+            echo "Version mismatch: package.json has '$package_version' but tag is '$tag_version'" >&2
+            exit 1
+          fi
+          echo "Version OK: $package_version"
+
+      - name: Build
+        run: pnpm build
+
+      - name: Configure npm registry for publish
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .tool-versions
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish package to npm
+        run: npm publish --access public
