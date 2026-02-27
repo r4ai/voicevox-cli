@@ -166,6 +166,32 @@ voicevox presets delete <id>
 | `--post-phoneme-length` |        | 終了無音時間           |
 | `--host`                |        | VoiceVox Engine の URL |
 
+### `voicevox validate-kana <text>`
+
+テキストが AquesTalk 風記法に従っているか検証します。
+
+```bash
+voicevox validate-kana "コンニチワ"
+```
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
+
+### `voicevox morphable-targets`
+
+エンジンからスピーカー一覧を取得し、各スタイルのモーフィング可否を表示します。
+
+```bash
+voicevox morphable-targets
+voicevox morphable-targets --json   # JSON で出力
+```
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
+| `--json`   | `false`                  | JSON で出力            |
+
 ### `voicevox mcp`
 
 MCP サーバーを stdio モードで起動します。
@@ -179,21 +205,23 @@ voicevox mcp --host http://localhost:50021
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
 
-| ツール名                         | 説明                                                    |
-| -------------------------------- | ------------------------------------------------------- |
-| `list_speakers`                  | 利用可能なスピーカーの一覧を返す                        |
-| `audio_query`                    | テキストの AudioQuery JSON を返す                       |
-| `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す |
-| `get_accent_phrases`             | テキストからアクセント句を取得する                      |
-| `get_mora_data`                  | アクセント句から音素の長さと音高を取得する              |
-| `get_mora_length`                | アクセント句から音素の長さを取得する                    |
-| `get_mora_pitch`                 | アクセント句から音高を取得する                          |
-| `get_user_dict`                  | ユーザー辞書の全単語を返す                              |
-| `add_user_dict_word`             | ユーザー辞書に単語を追加する                            |
-| `update_user_dict_word`          | ユーザー辞書の単語を更新する                            |
-| `delete_user_dict_word`          | ユーザー辞書の単語を削除する                            |
-| `list_presets`                   | プリセット一覧を返す                                    |
-| `create_audio_query_from_preset` | プリセットを使って AudioQuery を作成する                |
+| ツール名                         | 説明                                                     |
+| -------------------------------- | -------------------------------------------------------- |
+| `list_speakers`                  | 利用可能なスピーカーの一覧を返す                         |
+| `audio_query`                    | テキストの AudioQuery JSON を返す                        |
+| `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す  |
+| `get_accent_phrases`             | テキストからアクセント句を取得する                       |
+| `get_mora_data`                  | アクセント句から音素の長さと音高を取得する               |
+| `get_mora_length`                | アクセント句から音素の長さを取得する                     |
+| `get_mora_pitch`                 | アクセント句から音高を取得する                           |
+| `get_user_dict`                  | ユーザー辞書の全単語を返す                               |
+| `add_user_dict_word`             | ユーザー辞書に単語を追加する                             |
+| `update_user_dict_word`          | ユーザー辞書の単語を更新する                             |
+| `delete_user_dict_word`          | ユーザー辞書の単語を削除する                             |
+| `list_presets`                   | プリセット一覧を返す                                     |
+| `create_audio_query_from_preset` | プリセットを使って AudioQuery を作成する                 |
+| `validate_kana`                  | AquesTalk 風かな表記が正しいか検証する                   |
+| `get_morphable_targets`          | 指定スタイルからモーフィング可能なスタイル一覧を取得する |
 
 ### Claude Desktop への設定例
 

@@ -2,10 +2,12 @@ import { cli, define } from "gunshi"
 import { accentPhrasesCommand } from "./commands/accent-phrases.js"
 import { dictCommand } from "./commands/dict.js"
 import { mcpCommand } from "./commands/mcp.js"
+import { morphableTargetsCommand } from "./commands/morphable-targets.js"
 import { presetsCommand } from "./commands/presets.js"
 import { queryCommand } from "./commands/query.js"
 import { speakCommand } from "./commands/speak.js"
 import { speakersCommand } from "./commands/speakers.js"
+import { validateKanaCommand } from "./commands/validate-kana.js"
 
 const entryCommand = define({
   name: "voicevox",
@@ -23,6 +25,8 @@ await cli(process.argv.slice(2), entryCommand, {
     "accent-phrases": accentPhrasesCommand,
     dict: dictCommand,
     presets: presetsCommand,
+    "validate-kana": validateKanaCommand,
+    "morphable-targets": morphableTargetsCommand,
     mcp: mcpCommand,
   },
 })

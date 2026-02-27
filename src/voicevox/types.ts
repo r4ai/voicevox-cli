@@ -4,11 +4,35 @@ export interface Style {
   type?: string
 }
 
+export type PermittedSynthesisMorphing = "ALL" | "SELF_ONLY" | "NOTHING"
+
+export interface SpeakerSupportedFeatures {
+  permitted_synthesis_morphing: PermittedSynthesisMorphing
+}
+
 export interface Speaker {
   name: string
   speaker_uuid: string
   styles: Style[]
   version?: string
+  supported_features?: SpeakerSupportedFeatures
+}
+
+export interface SpeakerSupportPermittedSynthesisMorphing {
+  name: string
+  speaker_uuid: string
+  styles: Style[]
+  version?: string
+  supported_features: SpeakerSupportedFeatures
+}
+
+export interface MorphableTargetInfo {
+  is_morphable: boolean
+}
+
+export interface ParseKanaBadRequest {
+  error_name: string
+  error_args: { text: string }
 }
 
 export interface Mora {
