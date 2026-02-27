@@ -10,45 +10,74 @@ import type {
   Score,
   Speaker,
   SpeakerInfo,
-  SpeakerSupportPermittedSynthesisMorphing,
   SupportedDevices,
   UserDictWord,
 } from "./types.js"
 
+interface CoreVersionOptions {
+  coreVersion?: string
+}
+
+interface KatakanaEnglishOptions extends CoreVersionOptions {
+  enableKatakanaEnglish?: boolean
+}
+
+interface InterrogativeUpspeakOptions extends CoreVersionOptions {
+  enableInterrogativeUpspeak?: boolean
+}
+
+export type EngineSettingUpdate = Pick<EngineSetting, "cors_policy_mode"> & {
+  allow_origin?: string | null
+}
+
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
+
+  private setCoreVersion(url: URL, coreVersion?: string): void {
+    if (coreVersion !== undefined) url.searchParams.set("core_version", coreVersion)
+  }
 
   async getSpeakerInfo(
     speakerUuid: string,
     resourceFormat?: "base64" | "url",
+    options: CoreVersionOptions = {},
   ): Promise<SpeakerInfo> {
     const url = new URL(`${this.baseUrl}/speaker_info`)
     url.searchParams.set("speaker_uuid", speakerUuid)
     if (resourceFormat) url.searchParams.set("resource_format", resourceFormat)
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url)
     if (!res.ok) throw new Error(`GET /speaker_info failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<SpeakerInfo>
   }
 
-  async initializeSpeaker(speaker: number, skipReinit?: boolean): Promise<void> {
+  async initializeSpeaker(
+    speaker: number,
+    skipReinit?: boolean,
+    options: CoreVersionOptions = {},
+  ): Promise<void> {
     const url = new URL(`${this.baseUrl}/initialize_speaker`)
     url.searchParams.set("speaker", String(speaker))
     if (skipReinit !== undefined) url.searchParams.set("skip_reinit", String(skipReinit))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, { method: "POST" })
     if (!res.ok) throw new Error(`POST /initialize_speaker failed: ${res.status} ${res.statusText}`)
   }
 
-  async isInitializedSpeaker(speaker: number): Promise<boolean> {
+  async isInitializedSpeaker(speaker: number, options: CoreVersionOptions = {}): Promise<boolean> {
     const url = new URL(`${this.baseUrl}/is_initialized_speaker`)
     url.searchParams.set("speaker", String(speaker))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url)
     if (!res.ok)
       throw new Error(`GET /is_initialized_speaker failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<boolean>
   }
 
-  async getSpeakers(): Promise<Speaker[]> {
-    const res = await fetch(`${this.baseUrl}/speakers`)
+  async getSpeakers(options: CoreVersionOptions = {}): Promise<Speaker[]> {
+    const url = new URL(`${this.baseUrl}/speakers`)
+    this.setCoreVersion(url, options.coreVersion)
+    const res = await fetch(url)
     if (!res.ok) throw new Error(`GET /speakers failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<Speaker[]>
   }
@@ -59,18 +88,43 @@ export class VoiceVoxClient {
     return res.json() as Promise<string>
   }
 
-  async createAudioQuery(text: string, speaker: number): Promise<AudioQuery> {
+  async getPortalPage(): Promise<string> {
+    const res = await fetch(`${this.baseUrl}/`)
+    if (!res.ok) throw new Error(`GET / failed: ${res.status} ${res.statusText}`)
+    return res.text()
+  }
+
+  async createAudioQuery(
+    text: string,
+    speaker: number,
+    options: KatakanaEnglishOptions = {},
+  ): Promise<AudioQuery> {
     const url = new URL(`${this.baseUrl}/audio_query`)
     url.searchParams.set("text", text)
     url.searchParams.set("speaker", String(speaker))
+    if (options.enableKatakanaEnglish !== undefined) {
+      url.searchParams.set("enable_katakana_english", String(options.enableKatakanaEnglish))
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, { method: "POST" })
     if (!res.ok) throw new Error(`POST /audio_query failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<AudioQuery>
   }
 
-  async synthesize(query: AudioQuery, speaker: number): Promise<ArrayBuffer> {
+  async synthesize(
+    query: AudioQuery,
+    speaker: number,
+    options: InterrogativeUpspeakOptions = {},
+  ): Promise<ArrayBuffer> {
     const url = new URL(`${this.baseUrl}/synthesis`)
     url.searchParams.set("speaker", String(speaker))
+    if (options.enableInterrogativeUpspeak !== undefined) {
+      url.searchParams.set(
+        "enable_interrogative_upspeak",
+        String(options.enableInterrogativeUpspeak),
+      )
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -131,19 +185,33 @@ export class VoiceVoxClient {
       throw new Error(`DELETE /user_dict_word/${wordUuid} failed: ${res.status} ${res.statusText}`)
   }
 
-  async getAccentPhrases(text: string, speaker: number, isKana = false): Promise<AccentPhrase[]> {
+  async getAccentPhrases(
+    text: string,
+    speaker: number,
+    isKana = false,
+    options: KatakanaEnglishOptions = {},
+  ): Promise<AccentPhrase[]> {
     const url = new URL(`${this.baseUrl}/accent_phrases`)
     url.searchParams.set("text", text)
     url.searchParams.set("speaker", String(speaker))
     url.searchParams.set("is_kana", String(isKana))
+    if (options.enableKatakanaEnglish !== undefined) {
+      url.searchParams.set("enable_katakana_english", String(options.enableKatakanaEnglish))
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, { method: "POST" })
     if (!res.ok) throw new Error(`POST /accent_phrases failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<AccentPhrase[]>
   }
 
-  async getMoraData(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+  async getMoraData(
+    accentPhrases: AccentPhrase[],
+    speaker: number,
+    options: CoreVersionOptions = {},
+  ): Promise<AccentPhrase[]> {
     const url = new URL(`${this.baseUrl}/mora_data`)
     url.searchParams.set("speaker", String(speaker))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -153,9 +221,14 @@ export class VoiceVoxClient {
     return res.json() as Promise<AccentPhrase[]>
   }
 
-  async getMoraLength(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+  async getMoraLength(
+    accentPhrases: AccentPhrase[],
+    speaker: number,
+    options: CoreVersionOptions = {},
+  ): Promise<AccentPhrase[]> {
     const url = new URL(`${this.baseUrl}/mora_length`)
     url.searchParams.set("speaker", String(speaker))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -165,9 +238,14 @@ export class VoiceVoxClient {
     return res.json() as Promise<AccentPhrase[]>
   }
 
-  async getMoraPitch(accentPhrases: AccentPhrase[], speaker: number): Promise<AccentPhrase[]> {
+  async getMoraPitch(
+    accentPhrases: AccentPhrase[],
+    speaker: number,
+    options: CoreVersionOptions = {},
+  ): Promise<AccentPhrase[]> {
     const url = new URL(`${this.baseUrl}/mora_pitch`)
     url.searchParams.set("speaker", String(speaker))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -210,10 +288,18 @@ export class VoiceVoxClient {
     if (!res.ok) throw new Error(`POST /delete_preset failed: ${res.status} ${res.statusText}`)
   }
 
-  async createAudioQueryFromPreset(text: string, presetId: number): Promise<AudioQuery> {
+  async createAudioQueryFromPreset(
+    text: string,
+    presetId: number,
+    options: KatakanaEnglishOptions = {},
+  ): Promise<AudioQuery> {
     const url = new URL(`${this.baseUrl}/audio_query_from_preset`)
     url.searchParams.set("text", text)
     url.searchParams.set("preset_id", String(presetId))
+    if (options.enableKatakanaEnglish !== undefined) {
+      url.searchParams.set("enable_katakana_english", String(options.enableKatakanaEnglish))
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, { method: "POST" })
     if (!res.ok)
       throw new Error(`POST /audio_query_from_preset failed: ${res.status} ${res.statusText}`)
@@ -230,12 +316,15 @@ export class VoiceVoxClient {
   }
 
   async getMorphableTargets(
-    coreVersionSpeakers: SpeakerSupportPermittedSynthesisMorphing[][],
+    baseStyleIds: number[],
+    options: CoreVersionOptions = {},
   ): Promise<Record<string, MorphableTargetInfo>[]> {
-    const res = await fetch(`${this.baseUrl}/morphable_targets`, {
+    const url = new URL(`${this.baseUrl}/morphable_targets`)
+    this.setCoreVersion(url, options.coreVersion)
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(coreVersionSpeakers),
+      body: JSON.stringify(baseStyleIds),
     })
     if (!res.ok) throw new Error(`POST /morphable_targets failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<Record<string, MorphableTargetInfo>[]>
@@ -264,8 +353,10 @@ export class VoiceVoxClient {
     return res.json() as Promise<string[]>
   }
 
-  async getSupportedDevices(): Promise<SupportedDevices> {
-    const res = await fetch(`${this.baseUrl}/supported_devices`)
+  async getSupportedDevices(options: CoreVersionOptions = {}): Promise<SupportedDevices> {
+    const url = new URL(`${this.baseUrl}/supported_devices`)
+    this.setCoreVersion(url, options.coreVersion)
+    const res = await fetch(url)
     if (!res.ok) throw new Error(`GET /supported_devices failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<SupportedDevices>
   }
@@ -276,17 +367,25 @@ export class VoiceVoxClient {
     return res.json() as Promise<EngineSetting>
   }
 
-  async updateSetting(setting: EngineSetting): Promise<void> {
+  async updateSetting(setting: EngineSettingUpdate): Promise<void> {
+    const body = new URLSearchParams()
+    body.set("cors_policy_mode", setting.cors_policy_mode)
+    if (setting.allow_origin !== undefined) {
+      body.set("allow_origin", setting.allow_origin ?? "")
+    }
+
     const res = await fetch(`${this.baseUrl}/setting`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(setting),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
     })
     if (!res.ok) throw new Error(`POST /setting failed: ${res.status} ${res.statusText}`)
   }
 
-  async getSingers(): Promise<Speaker[]> {
-    const res = await fetch(`${this.baseUrl}/singers`)
+  async getSingers(options: CoreVersionOptions = {}): Promise<Speaker[]> {
+    const url = new URL(`${this.baseUrl}/singers`)
+    this.setCoreVersion(url, options.coreVersion)
+    const res = await fetch(url)
     if (!res.ok) throw new Error(`GET /singers failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<Speaker[]>
   }
@@ -294,18 +393,25 @@ export class VoiceVoxClient {
   async getSingerInfo(
     speakerUuid: string,
     resourceFormat?: "base64" | "url",
+    options: CoreVersionOptions = {},
   ): Promise<SpeakerInfo> {
     const url = new URL(`${this.baseUrl}/singer_info`)
     url.searchParams.set("speaker_uuid", speakerUuid)
     if (resourceFormat) url.searchParams.set("resource_format", resourceFormat)
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url)
     if (!res.ok) throw new Error(`GET /singer_info failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<SpeakerInfo>
   }
 
-  async createSingFrameAudioQuery(score: Score, singer: number): Promise<FrameAudioQuery> {
+  async createSingFrameAudioQuery(
+    score: Score,
+    singer: number,
+    options: CoreVersionOptions = {},
+  ): Promise<FrameAudioQuery> {
     const url = new URL(`${this.baseUrl}/sing_frame_audio_query`)
     url.searchParams.set("speaker", String(singer))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -316,13 +422,19 @@ export class VoiceVoxClient {
     return res.json() as Promise<FrameAudioQuery>
   }
 
-  async getSingFrameF0(score: Score, singer: number): Promise<number[]> {
+  async getSingFrameF0(
+    score: Score,
+    singer: number,
+    query: FrameAudioQuery,
+    options: CoreVersionOptions = {},
+  ): Promise<number[]> {
     const url = new URL(`${this.baseUrl}/sing_frame_f0`)
     url.searchParams.set("speaker", String(singer))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(score),
+      body: JSON.stringify({ score, frame_audio_query: query }),
     })
     if (!res.ok) throw new Error(`POST /sing_frame_f0 failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<number[]>
@@ -332,9 +444,11 @@ export class VoiceVoxClient {
     score: Score,
     singer: number,
     query: FrameAudioQuery,
+    options: CoreVersionOptions = {},
   ): Promise<number[]> {
     const url = new URL(`${this.baseUrl}/sing_frame_volume`)
     url.searchParams.set("speaker", String(singer))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -344,9 +458,14 @@ export class VoiceVoxClient {
     return res.json() as Promise<number[]>
   }
 
-  async frameSynthesis(query: FrameAudioQuery, singer: number): Promise<ArrayBuffer> {
+  async frameSynthesis(
+    query: FrameAudioQuery,
+    singer: number,
+    options: CoreVersionOptions = {},
+  ): Promise<ArrayBuffer> {
     const url = new URL(`${this.baseUrl}/frame_synthesis`)
     url.searchParams.set("speaker", String(singer))
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -356,9 +475,20 @@ export class VoiceVoxClient {
     return res.arrayBuffer()
   }
 
-  async multiSynthesize(queries: AudioQuery[], speaker: number): Promise<ArrayBuffer> {
+  async multiSynthesize(
+    queries: AudioQuery[],
+    speaker: number,
+    options: InterrogativeUpspeakOptions = {},
+  ): Promise<ArrayBuffer> {
     const url = new URL(`${this.baseUrl}/multi_synthesis`)
     url.searchParams.set("speaker", String(speaker))
+    if (options.enableInterrogativeUpspeak !== undefined) {
+      url.searchParams.set(
+        "enable_interrogative_upspeak",
+        String(options.enableInterrogativeUpspeak),
+      )
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -373,11 +503,19 @@ export class VoiceVoxClient {
     baseSpeaker: number,
     targetSpeaker: number,
     morphRate: number,
+    options: InterrogativeUpspeakOptions = {},
   ): Promise<ArrayBuffer> {
     const url = new URL(`${this.baseUrl}/synthesis_morphing`)
     url.searchParams.set("base_speaker", String(baseSpeaker))
     url.searchParams.set("target_speaker", String(targetSpeaker))
     url.searchParams.set("morph_rate", String(morphRate))
+    if (options.enableInterrogativeUpspeak !== undefined) {
+      url.searchParams.set(
+        "enable_interrogative_upspeak",
+        String(options.enableInterrogativeUpspeak),
+      )
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -387,9 +525,20 @@ export class VoiceVoxClient {
     return res.arrayBuffer()
   }
 
-  async cancellableSynthesize(query: AudioQuery, speaker: number): Promise<ArrayBuffer> {
+  async cancellableSynthesize(
+    query: AudioQuery,
+    speaker: number,
+    options: InterrogativeUpspeakOptions = {},
+  ): Promise<ArrayBuffer> {
     const url = new URL(`${this.baseUrl}/cancellable_synthesis`)
     url.searchParams.set("speaker", String(speaker))
+    if (options.enableInterrogativeUpspeak !== undefined) {
+      url.searchParams.set(
+        "enable_interrogative_upspeak",
+        String(options.enableInterrogativeUpspeak),
+      )
+    }
+    this.setCoreVersion(url, options.coreVersion)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

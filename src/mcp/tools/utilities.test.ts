@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { VoiceVoxClient } from "../../voicevox/client.js"
+import type { MorphableTargetInfo } from "../../voicevox/types.js"
 import { registerUtilityTools } from "./utilities.js"
 
 type ToolHandler = (args: Record<string, unknown>) => Promise<{
@@ -23,8 +24,11 @@ describe("MCP get_morphable_targets", () => {
     vi.restoreAllMocks()
   })
 
-  it("normalizes speakers without supported_features to ALL and returns results", async () => {
-    const mockResult = [{ "0": { is_morphable: true } }]
+  it("passes base style IDs to the client and returns style-indexed results", async () => {
+    const mockResult: Record<string, MorphableTargetInfo>[] = [
+      { "1": { is_morphable: true } },
+      { "2": { is_morphable: false } },
+    ]
     vi.spyOn(VoiceVoxClient.prototype, "getMorphableTargets").mockResolvedValue(mockResult)
 
     const server = buildMockServer()
@@ -33,32 +37,20 @@ describe("MCP get_morphable_targets", () => {
     const handler = server.tools["get_morphable_targets"]
     const result = await handler({
       host: "http://localhost:50021",
-      core_version_speakers: [
-        [
-          {
-            name: "Test Speaker",
-            speaker_uuid: "uuid-1",
-            styles: [{ name: "Normal", id: 0 }],
-          },
-        ],
-      ],
+      base_style_ids: [100, 200],
     })
 
     expect(result.isError).toBeUndefined()
-    expect(JSON.parse(result.content[0].text)).toEqual(mockResult)
-    expect(VoiceVoxClient.prototype.getMorphableTargets).toHaveBeenCalledWith([
-      [
-        {
-          name: "Test Speaker",
-          speaker_uuid: "uuid-1",
-          styles: [{ name: "Normal", id: 0 }],
-          supported_features: { permitted_synthesis_morphing: "ALL" },
-        },
-      ],
+    expect(JSON.parse(result.content[0].text)).toEqual([
+      { base_style_id: 100, targets: mockResult[0] },
+      { base_style_id: 200, targets: mockResult[1] },
     ])
+    expect(VoiceVoxClient.prototype.getMorphableTargets).toHaveBeenCalledWith([100, 200], {
+      coreVersion: undefined,
+    })
   })
 
-  it("preserves supported_features when already present", async () => {
+  it("passes core_version when provided", async () => {
     vi.spyOn(VoiceVoxClient.prototype, "getMorphableTargets").mockResolvedValue([])
 
     const server = buildMockServer()
@@ -66,25 +58,13 @@ describe("MCP get_morphable_targets", () => {
 
     await server.tools["get_morphable_targets"]({
       host: "http://localhost:50021",
-      core_version_speakers: [
-        [
-          {
-            name: "Speaker",
-            speaker_uuid: "uuid-2",
-            styles: [{ name: "Normal", id: 1 }],
-            supported_features: { permitted_synthesis_morphing: "SELF_ONLY" },
-          },
-        ],
-      ],
+      base_style_ids: [1],
+      core_version: "0.15.0",
     })
 
-    expect(VoiceVoxClient.prototype.getMorphableTargets).toHaveBeenCalledWith([
-      [
-        expect.objectContaining({
-          supported_features: { permitted_synthesis_morphing: "SELF_ONLY" },
-        }),
-      ],
-    ])
+    expect(VoiceVoxClient.prototype.getMorphableTargets).toHaveBeenCalledWith([1], {
+      coreVersion: "0.15.0",
+    })
   })
 })
 

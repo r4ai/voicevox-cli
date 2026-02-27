@@ -41,7 +41,7 @@ export function registerSettingTools(server: McpServer, defaultHost: string): vo
         allow_origin: z
           .string()
           .nullable()
-          .default(null)
+          .optional()
           .describe("Allowed origin, or null to disable"),
         host: HOST_SCHEMA(defaultHost),
       },
@@ -49,10 +49,14 @@ export function registerSettingTools(server: McpServer, defaultHost: string): vo
     async (args) => {
       try {
         const client = new VoiceVoxClient(args.host)
-        await client.updateSetting({
-          cors_policy_mode: args.cors_policy_mode,
-          allow_origin: args.allow_origin,
-        })
+        await client.updateSetting(
+          args.allow_origin === undefined
+            ? { cors_policy_mode: args.cors_policy_mode }
+            : {
+                cors_policy_mode: args.cors_policy_mode,
+                allow_origin: args.allow_origin,
+              },
+        )
         return {
           content: [{ type: "text", text: "Setting updated successfully." }],
         }
