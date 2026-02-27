@@ -4,8 +4,10 @@
 
 ## 必要環境
 
-- Node.js 22+
+- Node.js 24+
 - [VoiceVox Engine](https://github.com/VOICEVOX/voicevox_engine) (デフォルト: `http://localhost:50021`)
+
+`.tool-versions` を使う場合は `asdf install` または `mise install` で Node.js を揃えてください。
 
 ## インストール
 
