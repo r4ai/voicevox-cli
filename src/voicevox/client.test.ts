@@ -241,10 +241,13 @@ describe("VoiceVoxClient.getSetting", () => {
     vi.restoreAllMocks()
   })
 
-  it("GETs /setting and returns the engine setting", async () => {
+  it("GETs /setting and parses the engine setting from HTML", async () => {
     const mockSetting = { cors_policy_mode: "localapps" as const, allow_origin: null }
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(mockSetting), { status: 200 }),
+      new Response(
+        '<script>const corsPolicyMode = ref("localapps"); const allowOrigin = ref("");</script>',
+        { status: 200 },
+      ),
     )
     const client = new VoiceVoxClient("http://localhost:50021")
     const result = await client.getSetting()
@@ -257,6 +260,16 @@ describe("VoiceVoxClient.getSetting", () => {
     )
     const client = new VoiceVoxClient("http://localhost:50021")
     await expect(client.getSetting()).rejects.toThrow("GET /setting failed: 500")
+  })
+
+  it("throws when setting values cannot be parsed from HTML", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("<html><body>setting page</body></html>", { status: 200 }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSetting()).rejects.toThrow(
+      "GET /setting failed: could not parse setting values from HTML",
+    )
   })
 })
 

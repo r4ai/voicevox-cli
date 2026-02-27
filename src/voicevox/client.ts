@@ -369,11 +369,13 @@ export class VoiceVoxClient {
 
     const corsPolicyModeMatch = html.match(/const corsPolicyMode = ref\(\s*"([^"]+)"/)
     const allowOriginMatch = html.match(/const allowOrigin = ref\("([^"]*)"/)
+    if (!corsPolicyModeMatch || !allowOriginMatch) {
+      throw new Error("GET /setting failed: could not parse setting values from HTML")
+    }
 
     return {
-      cors_policy_mode: (corsPolicyModeMatch?.[1] ??
-        "localapps") as EngineSetting["cors_policy_mode"],
-      allow_origin: allowOriginMatch?.[1] || null,
+      cors_policy_mode: corsPolicyModeMatch[1] as EngineSetting["cors_policy_mode"],
+      allow_origin: allowOriginMatch[1] || null,
     }
   }
 
