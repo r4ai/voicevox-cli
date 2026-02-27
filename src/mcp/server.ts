@@ -10,6 +10,7 @@ import { registerListSpeakersTool } from "./tools/list-speakers.js"
 import { registerPresetTools } from "./tools/presets.js"
 import { registerSettingTools } from "./tools/setting.js"
 import { registerSpeakerInfoTool } from "./tools/speaker-info.js"
+import { registerListSingersTool, registerSingTool } from "./tools/singers.js"
 import { registerSynthesizeTool } from "./tools/synthesize.js"
 import { registerUserDictTools } from "./tools/user-dict.js"
 import { registerUtilityTools } from "./tools/utilities.js"
@@ -32,6 +33,8 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerUtilityTools(server, defaultHost)
   registerEngineInfoTool(server, defaultHost)
   registerSettingTools(server, defaultHost)
+  registerListSingersTool(server, defaultHost)
+  registerSingTool(server, defaultHost)
 
   return server
 }

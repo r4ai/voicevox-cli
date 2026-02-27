@@ -3,9 +3,11 @@ import type {
   AudioQuery,
   EngineSetting,
   EngineManifest,
+  FrameAudioQuery,
   MorphableTargetInfo,
   ParseKanaBadRequest,
   Preset,
+  Score,
   Speaker,
   SpeakerInfo,
   SpeakerSupportPermittedSynthesisMorphing,
@@ -281,5 +283,76 @@ export class VoiceVoxClient {
       body: JSON.stringify(setting),
     })
     if (!res.ok) throw new Error(`POST /setting failed: ${res.status} ${res.statusText}`)
+  }
+
+  async getSingers(): Promise<Speaker[]> {
+    const res = await fetch(`${this.baseUrl}/singers`)
+    if (!res.ok) throw new Error(`GET /singers failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<Speaker[]>
+  }
+
+  async getSingerInfo(
+    speakerUuid: string,
+    resourceFormat?: "base64" | "url",
+  ): Promise<SpeakerInfo> {
+    const url = new URL(`${this.baseUrl}/singer_info`)
+    url.searchParams.set("speaker_uuid", speakerUuid)
+    if (resourceFormat) url.searchParams.set("resource_format", resourceFormat)
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`GET /singer_info failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<SpeakerInfo>
+  }
+
+  async createSingFrameAudioQuery(score: Score, singer: number): Promise<FrameAudioQuery> {
+    const url = new URL(`${this.baseUrl}/sing_frame_audio_query`)
+    url.searchParams.set("speaker", String(singer))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(score),
+    })
+    if (!res.ok)
+      throw new Error(`POST /sing_frame_audio_query failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<FrameAudioQuery>
+  }
+
+  async getSingFrameF0(score: Score, singer: number): Promise<number[]> {
+    const url = new URL(`${this.baseUrl}/sing_frame_f0`)
+    url.searchParams.set("speaker", String(singer))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(score),
+    })
+    if (!res.ok) throw new Error(`POST /sing_frame_f0 failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<number[]>
+  }
+
+  async getSingFrameVolume(
+    score: Score,
+    singer: number,
+    query: FrameAudioQuery,
+  ): Promise<number[]> {
+    const url = new URL(`${this.baseUrl}/sing_frame_volume`)
+    url.searchParams.set("speaker", String(singer))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ score, frame_audio_query: query }),
+    })
+    if (!res.ok) throw new Error(`POST /sing_frame_volume failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<number[]>
+  }
+
+  async frameSynthesis(query: FrameAudioQuery, singer: number): Promise<ArrayBuffer> {
+    const url = new URL(`${this.baseUrl}/frame_synthesis`)
+    url.searchParams.set("speaker", String(singer))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    })
+    if (!res.ok) throw new Error(`POST /frame_synthesis failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
   }
 }
