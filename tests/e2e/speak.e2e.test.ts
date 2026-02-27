@@ -97,13 +97,36 @@ describe("voicevox speak", () => {
   })
 
   it("synthesizes with --morph-target", async () => {
+    const morphData = JSON.parse(
+      (await runCli("morphable-targets", "--host", VOICEVOX_HOST, "--json")).stdout,
+    ) as {
+      base_style_ids: number[]
+      targets: Record<string, { is_morphable: boolean }>[]
+    }
+
+    let baseId: number | undefined
+    let targetId: number | undefined
+    outer: for (const [i, base] of morphData.base_style_ids.entries()) {
+      for (const [styleId, info] of Object.entries(morphData.targets[i] ?? {})) {
+        if (info.is_morphable && Number(styleId) !== base) {
+          baseId = base
+          targetId = Number(styleId)
+          break outer
+        }
+      }
+    }
+    expect(baseId).toBeDefined()
+    expect(targetId).toBeDefined()
+
     tmpDir = await makeTmpDir()
     const out = join(tmpDir, "morph.wav")
     const { stdout, exitCode } = await runCli(
       "speak",
       "テスト",
+      "--speaker",
+      String(baseId),
       "--morph-target",
-      "3",
+      String(targetId),
       "--morph-rate",
       "0.5",
       "--output",
