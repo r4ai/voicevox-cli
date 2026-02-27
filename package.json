@@ -21,6 +21,7 @@
     "test:e2e": "pnpm build && vitest run --project e2e"
   },
   "dependencies": {
+    "@gunshi/plugin-completion": "^0.29.2",
     "@modelcontextprotocol/sdk": "latest",
     "gunshi": "latest",
     "zod": "latest"
