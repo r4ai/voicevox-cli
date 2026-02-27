@@ -33,6 +33,7 @@ export const speakerInfoCommand = define({
       info = await client.getSpeakerInfo(uuid)
     } catch (err) {
       handleCommandError(err, host)
+      return
     }
 
     if (asJson) {

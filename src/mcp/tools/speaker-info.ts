@@ -17,7 +17,6 @@ export function registerSpeakerInfoTool(server: McpServer, defaultHost: string):
         resource_format: z
           .enum(["base64", "url"])
           .default("base64")
-          .optional()
           .describe("Format for image resources (base64 or url)"),
       },
     },

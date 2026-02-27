@@ -16,7 +16,10 @@ import type {
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
 
-  async getSpeakerInfo(speakerUuid: string, resourceFormat?: string): Promise<SpeakerInfo> {
+  async getSpeakerInfo(
+    speakerUuid: string,
+    resourceFormat?: "base64" | "url",
+  ): Promise<SpeakerInfo> {
     const url = new URL(`${this.baseUrl}/speaker_info`)
     url.searchParams.set("speaker_uuid", speakerUuid)
     if (resourceFormat) url.searchParams.set("resource_format", resourceFormat)

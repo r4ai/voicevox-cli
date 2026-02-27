@@ -2,6 +2,8 @@ import { cli, define } from "gunshi"
 import { accentPhrasesCommand } from "./commands/accent-phrases.js"
 import { dictCommand } from "./commands/dict.js"
 import { infoCommand } from "./commands/info.js"
+import { initializeSpeakerCommand } from "./commands/initialize-speaker.js"
+import { isInitializedSpeakerCommand } from "./commands/is-initialized-speaker.js"
 import { mcpCommand } from "./commands/mcp.js"
 import { morphableTargetsCommand } from "./commands/morphable-targets.js"
 import { presetsCommand } from "./commands/presets.js"
@@ -26,6 +28,8 @@ await cli(process.argv.slice(2), entryCommand, {
     speak: speakCommand,
     speakers: speakersCommand,
     "speaker-info": speakerInfoCommand,
+    "initialize-speaker": initializeSpeakerCommand,
+    "is-initialized-speaker": isInitializedSpeakerCommand,
     query: queryCommand,
     "accent-phrases": accentPhrasesCommand,
     dict: dictCommand,
