@@ -125,6 +125,14 @@ describe("VoiceVoxClient.getCoreVersions", () => {
     const result = await client.getCoreVersions()
     expect(result).toEqual(mockVersions)
   })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 500, statusText: "Internal Server Error" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getCoreVersions()).rejects.toThrow("GET /core_versions failed: 500")
+  })
 })
 
 describe("VoiceVoxClient.getSupportedDevices", () => {
@@ -141,6 +149,14 @@ describe("VoiceVoxClient.getSupportedDevices", () => {
     const result = await client.getSupportedDevices()
     expect(result).toEqual(mockDevices)
   })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 500, statusText: "Internal Server Error" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSupportedDevices()).rejects.toThrow("GET /supported_devices failed: 500")
+  })
 })
 
 describe("VoiceVoxClient.getSetting", () => {
@@ -156,6 +172,14 @@ describe("VoiceVoxClient.getSetting", () => {
     const client = new VoiceVoxClient("http://localhost:50021")
     const result = await client.getSetting()
     expect(result).toEqual(mockSetting)
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 500, statusText: "Internal Server Error" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getSetting()).rejects.toThrow("GET /setting failed: 500")
   })
 })
 
@@ -178,5 +202,15 @@ describe("VoiceVoxClient.updateSetting", () => {
         body: JSON.stringify(setting),
       }),
     )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 500, statusText: "Internal Server Error" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(
+      client.updateSetting({ cors_policy_mode: "localapps", allow_origin: null }),
+    ).rejects.toThrow("POST /setting failed: 500")
   })
 })

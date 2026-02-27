@@ -219,6 +219,31 @@ voicevox info --json   # JSON で出力
 | `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
 | `--json`   | `false`                  | JSON で出力            |
 
+### `voicevox setting`
+
+エンジン設定を表示・更新します。
+
+```bash
+voicevox setting                                      # 現在の設定を表示
+voicevox setting --json                               # JSON で出力
+voicevox setting set --cors-policy-mode all           # CORS ポリシーを変更
+voicevox setting set --allow-origin http://localhost  # 許可 Origin を設定
+voicevox setting set --allow-origin ""                # 許可 Origin をクリア
+```
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
+| `--json`   | `false`                  | JSON で出力            |
+
+#### `voicevox setting set`
+
+| オプション           | 説明                                     |
+| -------------------- | ---------------------------------------- |
+| `--cors-policy-mode` | CORS ポリシーモード: `localapps` / `all` |
+| `--allow-origin`     | 許可する Origin（空文字列でクリア）      |
+| `--host`             | VoiceVox Engine の URL                   |
+
 ### `voicevox mcp`
 
 MCP サーバーを stdio モードで起動します。
@@ -250,6 +275,8 @@ voicevox mcp --host http://localhost:50021
 | `validate_kana`                  | AquesTalk 風かな表記が正しいか検証する                               |
 | `get_morphable_targets`          | 指定スタイルからモーフィング可能なスタイル一覧を取得する             |
 | `get_engine_info`                | エンジン情報（バージョン・マニフェスト・対応デバイス）を一括取得する |
+| `get_setting`                    | エンジン設定を取得する                                               |
+| `update_setting`                 | エンジン設定を更新する                                               |
 
 ### Claude Desktop への設定例
 

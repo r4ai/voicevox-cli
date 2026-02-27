@@ -88,15 +88,17 @@ describe("MCP get_engine_info", () => {
   })
 
   it("uses the provided host when calling client methods", async () => {
-    const getVersionSpy = vi
-      .spyOn(VoiceVoxClient.prototype, "getVersion")
-      .mockResolvedValue("0.15.3")
-    vi.spyOn(VoiceVoxClient.prototype, "getCoreVersions").mockResolvedValue(["0.15.3"])
-    vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockResolvedValue(MOCK_MANIFEST)
-    vi.spyOn(VoiceVoxClient.prototype, "getSupportedDevices").mockResolvedValue({
-      cpu: true,
-      cuda: false,
-      dml: false,
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const urlStr = String(url)
+      if (urlStr.includes("/version"))
+        return new Response(JSON.stringify("0.15.3"), { status: 200 })
+      if (urlStr.includes("/core_versions"))
+        return new Response(JSON.stringify(["0.15.3"]), { status: 200 })
+      if (urlStr.includes("/engine_manifest"))
+        return new Response(JSON.stringify(MOCK_MANIFEST), { status: 200 })
+      if (urlStr.includes("/supported_devices"))
+        return new Response(JSON.stringify({ cpu: true, cuda: false, dml: false }), { status: 200 })
+      return new Response("", { status: 404 })
     })
 
     const server = buildMockServer()
@@ -104,6 +106,7 @@ describe("MCP get_engine_info", () => {
 
     await server.tools["get_engine_info"]({ host: "http://custom-host:9999" })
 
-    expect(getVersionSpy).toHaveBeenCalledOnce()
+    const calledUrls = fetchMock.mock.calls.map(([url]) => String(url))
+    expect(calledUrls.every((u) => u.startsWith("http://custom-host:9999"))).toBe(true)
   })
 })

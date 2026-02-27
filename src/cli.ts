@@ -6,6 +6,7 @@ import { mcpCommand } from "./commands/mcp.js"
 import { morphableTargetsCommand } from "./commands/morphable-targets.js"
 import { presetsCommand } from "./commands/presets.js"
 import { queryCommand } from "./commands/query.js"
+import { settingCommand } from "./commands/setting.js"
 import { speakCommand } from "./commands/speak.js"
 import { speakersCommand } from "./commands/speakers.js"
 import { validateKanaCommand } from "./commands/validate-kana.js"
@@ -31,6 +32,7 @@ await cli(process.argv.slice(2), entryCommand, {
     "morphable-targets": morphableTargetsCommand,
     version: versionCommand,
     info: infoCommand,
+    setting: settingCommand,
     mcp: mcpCommand,
   },
 })
