@@ -5,6 +5,7 @@ import { registerListSpeakersTool } from "./tools/list-speakers.js"
 import { registerPresetTools } from "./tools/presets.js"
 import { registerSynthesizeTool } from "./tools/synthesize.js"
 import { registerUserDictTools } from "./tools/user-dict.js"
+import { registerUtilityTools } from "./tools/utilities.js"
 
 export function createMcpServer(defaultHost: string): McpServer {
   const server = new McpServer({
@@ -18,6 +19,7 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerAccentPhraseTools(server, defaultHost)
   registerUserDictTools(server, defaultHost)
   registerPresetTools(server, defaultHost)
+  registerUtilityTools(server, defaultHost)
 
   return server
 }

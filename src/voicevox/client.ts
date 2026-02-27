@@ -1,4 +1,13 @@
-import type { AccentPhrase, AudioQuery, Preset, Speaker, UserDictWord } from "./types.js"
+import type {
+  AccentPhrase,
+  AudioQuery,
+  MorphableTargetInfo,
+  ParseKanaBadRequest,
+  Preset,
+  Speaker,
+  SpeakerSupportPermittedSynthesisMorphing,
+  UserDictWord,
+} from "./types.js"
 
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
@@ -174,6 +183,27 @@ export class VoiceVoxClient {
     if (!res.ok)
       throw new Error(`POST /audio_query_from_preset failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<AudioQuery>
+  }
+
+  async validateKana(text: string): Promise<true | ParseKanaBadRequest> {
+    const url = new URL(`${this.baseUrl}/validate_kana`)
+    url.searchParams.set("text", text)
+    const res = await fetch(url, { method: "POST" })
+    if (res.status === 200) return true
+    if (res.status === 400) return res.json() as Promise<ParseKanaBadRequest>
+    throw new Error(`POST /validate_kana failed: ${res.status} ${res.statusText}`)
+  }
+
+  async getMorphableTargets(
+    coreVersionSpeakers: SpeakerSupportPermittedSynthesisMorphing[][],
+  ): Promise<Record<string, MorphableTargetInfo>[]> {
+    const res = await fetch(`${this.baseUrl}/morphable_targets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(coreVersionSpeakers),
+    })
+    if (!res.ok) throw new Error(`POST /morphable_targets failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<Record<string, MorphableTargetInfo>[]>
   }
 
   async importUserDict(dictData: Record<string, UserDictWord>, override: boolean): Promise<void> {
