@@ -26,8 +26,11 @@ const timeSignatureSchema = z.object({
 
 const scoreSchema = z.object({
   notes: z.array(noteSchema).describe("List of notes"),
-  tempos: z.array(tempoSchema).describe("List of tempo changes"),
-  time_signatures: z.array(timeSignatureSchema).describe("List of time signatures"),
+  tempos: z.array(tempoSchema).optional().describe("Optional list of tempo changes"),
+  time_signatures: z
+    .array(timeSignatureSchema)
+    .optional()
+    .describe("Optional list of time signatures"),
 })
 
 export function registerListSingersTool(server: McpServer, defaultHost: string): void {

@@ -18,14 +18,6 @@ export interface Speaker {
   supported_features?: SpeakerSupportedFeatures
 }
 
-export interface SpeakerSupportPermittedSynthesisMorphing {
-  name: string
-  speaker_uuid: string
-  styles: Style[]
-  version?: string
-  supported_features: SpeakerSupportedFeatures
-}
-
 export interface MorphableTargetInfo {
   is_morphable: boolean
 }
@@ -174,8 +166,8 @@ export interface TimeSignature {
 
 export interface Score {
   notes: Note[]
-  tempos: Tempo[]
-  time_signatures: TimeSignature[]
+  tempos?: Tempo[]
+  time_signatures?: TimeSignature[]
 }
 
 export interface FramePhoneme {

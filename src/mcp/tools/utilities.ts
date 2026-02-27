@@ -5,24 +5,6 @@ import { VoiceVoxClient } from "../../voicevox/client.js"
 const HOST_SCHEMA = (defaultHost: string) =>
   z.string().default(defaultHost).describe("VoiceVox engine URL")
 
-const STYLE_SCHEMA = z.object({
-  name: z.string(),
-  id: z.number().int(),
-  type: z.string().optional(),
-})
-
-const SUPPORTED_FEATURES_SCHEMA = z.object({
-  permitted_synthesis_morphing: z.enum(["ALL", "SELF_ONLY", "NOTHING"]),
-})
-
-const SPEAKER_SUPPORT_SCHEMA = z.object({
-  name: z.string(),
-  speaker_uuid: z.string(),
-  styles: z.array(STYLE_SCHEMA),
-  version: z.string().optional(),
-  supported_features: SUPPORTED_FEATURES_SCHEMA.optional(),
-})
-
 export function registerUtilityTools(server: McpServer, defaultHost: string): void {
   server.registerTool(
     "validate_kana",
@@ -63,30 +45,28 @@ export function registerUtilityTools(server: McpServer, defaultHost: string): vo
     "get_morphable_targets",
     {
       description:
-        "Determine which styles can be used as morphing targets for the given speakers. Pass the speakers obtained from list_speakers. Returns a list of dicts mapping style IDs to morphability info.",
+        "Determine which styles can be used as morphing targets for the given base style IDs.",
       inputSchema: {
-        core_version_speakers: z
-          .array(z.array(SPEAKER_SUPPORT_SCHEMA))
-          .describe(
-            "List of speaker lists per engine core version. Speakers without supported_features are treated as ALL.",
-          ),
+        base_style_ids: z
+          .array(z.number().int())
+          .min(1)
+          .describe("List of base style IDs to evaluate"),
+        core_version: z.string().optional().describe("Optional engine core version"),
         host: HOST_SCHEMA(defaultHost),
       },
     },
     async (args) => {
       try {
         const client = new VoiceVoxClient(args.host)
-        const normalized = args.core_version_speakers.map((speakers) =>
-          speakers.map((s) => ({
-            ...s,
-            supported_features: s.supported_features ?? {
-              permitted_synthesis_morphing: "ALL" as const,
-            },
-          })),
-        )
-        const result = await client.getMorphableTargets(normalized)
+        const result = await client.getMorphableTargets(args.base_style_ids, {
+          coreVersion: args.core_version,
+        })
+        const mappedResult = args.base_style_ids.map((styleId, index) => ({
+          base_style_id: styleId,
+          targets: result[index] ?? {},
+        }))
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(mappedResult, null, 2) }],
         }
       } catch (err) {
         return {
