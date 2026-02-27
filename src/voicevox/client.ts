@@ -261,11 +261,12 @@ export class VoiceVoxClient {
     return res.json() as Promise<Preset[]>
   }
 
-  async addPreset(preset: Omit<Preset, "id">): Promise<number> {
+  async addPreset(preset: Omit<Preset, "id"> & { id?: number }): Promise<number> {
+    const body = { id: preset.id ?? 0, ...preset }
     const res = await fetch(`${this.baseUrl}/add_preset`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(preset),
+      body: JSON.stringify(body),
     })
     if (!res.ok) throw new Error(`POST /add_preset failed: ${res.status} ${res.statusText}`)
     return res.json() as Promise<number>
@@ -364,7 +365,18 @@ export class VoiceVoxClient {
   async getSetting(): Promise<EngineSetting> {
     const res = await fetch(`${this.baseUrl}/setting`)
     if (!res.ok) throw new Error(`GET /setting failed: ${res.status} ${res.statusText}`)
-    return res.json() as Promise<EngineSetting>
+    const html = await res.text()
+
+    const corsPolicyModeMatch = html.match(/const corsPolicyMode = ref\(\s*"([^"]+)"/)
+    const allowOriginMatch = html.match(/const allowOrigin = ref\(\s*"([^"]*)"/)
+    if (!corsPolicyModeMatch || !allowOriginMatch) {
+      throw new Error("GET /setting failed: could not parse setting values from HTML")
+    }
+
+    return {
+      cors_policy_mode: corsPolicyModeMatch[1] as EngineSetting["cors_policy_mode"],
+      allow_origin: allowOriginMatch[1] || null,
+    }
   }
 
   async updateSetting(setting: EngineSettingUpdate): Promise<void> {

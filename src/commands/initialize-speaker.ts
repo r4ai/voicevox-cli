@@ -1,6 +1,7 @@
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 export const initializeSpeakerCommand = define({
   name: "initialize-speaker",
@@ -18,7 +19,7 @@ export const initializeSpeakerCommand = define({
     },
   },
   run: async (ctx) => {
-    const speakerStr = ctx.positionals[0]
+    const speakerStr = getPositionals(ctx)[0]
     if (!speakerStr) {
       console.error("Error: speaker ID is required")
       process.exit(1)

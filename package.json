@@ -16,7 +16,8 @@
     "fmt:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "test": "vitest run"
+    "test": "vitest run --project unit",
+    "test:e2e": "pnpm build && vitest run --project e2e"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",

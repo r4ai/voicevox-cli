@@ -370,4 +370,11 @@ voicevox mcp --host http://localhost:50021
 pnpm dev        # ウォッチモードでビルド
 pnpm build      # ビルド
 pnpm typecheck  # 型チェック
+pnpm test       # ユニットテストを実行
+```
+
+E2E テストを実行するには VoiceVox Engine が起動している必要があります。
+
+```bash
+VOICEVOX_HOST=http://localhost:50021 pnpm test:e2e
 ```

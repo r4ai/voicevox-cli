@@ -1,6 +1,7 @@
 import { define } from "gunshi"
 import { handleCommandError } from "../error.js"
 import { VoiceVoxClient } from "../voicevox/client.js"
+import { getPositionals } from "./positionals.js"
 
 const HOST_ARG = {
   host: {
@@ -141,7 +142,7 @@ const presetsUpdateCommand = define({
     },
   },
   run: async (ctx) => {
-    const idStr = ctx.positionals[0]
+    const idStr = getPositionals(ctx)[0]
     if (!idStr) {
       console.error("Error: id argument is required")
       console.error("Usage: voicevox presets update <id> [options]")
@@ -193,7 +194,7 @@ const presetsDeleteCommand = define({
     ...HOST_ARG,
   },
   run: async (ctx) => {
-    const idStr = ctx.positionals[0]
+    const idStr = getPositionals(ctx)[0]
     if (!idStr) {
       console.error("Error: id argument is required")
       console.error("Usage: voicevox presets delete <id>")
