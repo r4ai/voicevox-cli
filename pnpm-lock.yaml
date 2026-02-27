@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@gunshi/plugin-completion':
+        specifier: ^0.29.2
+        version: 0.29.2(@gunshi/plugin-i18n@0.29.2)(cac@6.7.14)
       '@modelcontextprotocol/sdk':
         specifier: latest
         version: 1.27.1(zod@4.3.6)
@@ -41,6 +44,21 @@ importers:
         version: 4.0.18(@types/node@25.3.0)
 
 packages:
+
+  '@bomb.sh/tab@0.0.11':
+    resolution: {integrity: sha512-RSqyreeicYBALcMaNxIUJTBknftXsyW45VRq5gKDNwKroh0Re5SDoWwXZaphb+OTEzVdpm/BA8Uq6y0P+AtVYw==}
+    hasBin: true
+    peerDependencies:
+      cac: ^6.7.14
+      citty: ^0.1.6
+      commander: ^13.1.0
+    peerDependenciesMeta:
+      cac:
+        optional: true
+      citty:
+        optional: true
+      commander:
+        optional: true
 
   '@esbuild/aix-ppc64@0.27.3':
     resolution: {integrity: sha512-9fJMTNFTWZMh5qwrBItuziu834eOCUcEqymSH7pY+zoMVEZg3gcPuBNxH1EvfVYe9h0x/Ptw8KBzv7qxb7l8dg==}
@@ -197,6 +215,25 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@gunshi/plugin-completion@0.29.2':
+    resolution: {integrity: sha512-9HPSwU06XTIbl6lY2aSeyMPp440lhpJugCI5BrGDkHQU+AMDoRUGk8wC5wbNlNiy+2w2prgnfg0PSG9xMyMimA==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      '@gunshi/plugin-i18n': 0.29.2
+
+  '@gunshi/plugin-i18n@0.29.2':
+    resolution: {integrity: sha512-dKoyChA+5jPpR/ifrxGJ2Qgop9qeTWY2nw1BIEQmO3l7w2wu5fe3OytAre5lFp7cAEH4T3Ong8+ecyXeX1ECsQ==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      '@gunshi/plugin-global': 0.29.2
+    peerDependenciesMeta:
+      '@gunshi/plugin-global':
+        optional: true
+
+  '@gunshi/plugin@0.29.2':
+    resolution: {integrity: sha512-6OSA2mAa3G+tIfY19PzcJrOp7Kbt7/BhYETLBNBLwsCOSmnKaqueDHM0YR8Ih4rI6jYTiOgiVfmBMuTUpxBjuA==}
+    engines: {node: '>= 20'}
 
   '@hono/node-server@1.19.9':
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
@@ -1402,6 +1439,10 @@ packages:
 
 snapshots:
 
+  '@bomb.sh/tab@0.0.11(cac@6.7.14)':
+    optionalDependencies:
+      cac: 6.7.14
+
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
 
@@ -1479,6 +1520,22 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.3':
     optional: true
+
+  '@gunshi/plugin-completion@0.29.2(@gunshi/plugin-i18n@0.29.2)(cac@6.7.14)':
+    dependencies:
+      '@bomb.sh/tab': 0.0.11(cac@6.7.14)
+      '@gunshi/plugin': 0.29.2
+      '@gunshi/plugin-i18n': 0.29.2
+    transitivePeerDependencies:
+      - cac
+      - citty
+      - commander
+
+  '@gunshi/plugin-i18n@0.29.2':
+    dependencies:
+      '@gunshi/plugin': 0.29.2
+
+  '@gunshi/plugin@0.29.2': {}
 
   '@hono/node-server@1.19.9(hono@4.12.2)':
     dependencies:
