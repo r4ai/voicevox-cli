@@ -13,10 +13,6 @@ export interface CliResult {
   exitCode: number
 }
 
-function stripBanner(output: string): string {
-  return output.replace(/^.*\(voicevox v[\d.]+\)\n\n?/, "")
-}
-
 export function runCli(...args: string[]): Promise<CliResult> {
   return new Promise((resolve) => {
     execFile(
@@ -25,7 +21,7 @@ export function runCli(...args: string[]): Promise<CliResult> {
       { timeout: 30_000, maxBuffer: 10 * 1024 * 1024 },
       (error, stdout, stderr) => {
         resolve({
-          stdout: stripBanner(stdout.toString()),
+          stdout: stdout.toString(),
           stderr: stderr.toString(),
           exitCode: error ? ((error as { code?: number }).code ?? 1) : 0,
         })
