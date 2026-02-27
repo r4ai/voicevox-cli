@@ -364,6 +364,8 @@ voicevox complete fish > ~/.config/fish/completions/voicevox.fish
 voicevox complete powershell >> $PROFILE
 ```
 
+詳しくは [@gunshi/plugin-completion](https://github.com/kazupon/gunshi/tree/main/packages/plugin-completion#shell-completion-setup) を参照してください。
+
 ## MCP サーバー
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
