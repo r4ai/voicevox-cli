@@ -29,16 +29,20 @@ pnpm link --global
 ```bash
 voicevox speak "こんにちは"
 voicevox speak "こんにちは" --speaker 3 --output hello.wav
-voicevox speak "こんにちは" --play   # 合成後に再生
+voicevox speak "こんにちは" --play                          # 合成後に再生
+voicevox speak "こんにちは" --morph-target 3               # スピーカー 1 と 3 をモーフィング
+voicevox speak "こんにちは" --morph-target 3 --morph-rate 0.8
 ```
 
-| オプション  | 短縮形 | デフォルト               | 説明                                  |
-| ----------- | ------ | ------------------------ | ------------------------------------- |
-| `--speaker` | `-s`   | `1`                      | スピーカー ID                         |
-| `--preset`  |        |                          | プリセット ID（`--speaker` より優先） |
-| `--output`  | `-o`   | `output.wav`             | 出力ファイルパス                      |
-| `--host`    |        | `http://localhost:50021` | VoiceVox Engine の URL                |
-| `--play`    | `-p`   | `false`                  | 合成後に再生                          |
+| オプション       | 短縮形 | デフォルト               | 説明                                             |
+| ---------------- | ------ | ------------------------ | ------------------------------------------------ |
+| `--speaker`      | `-s`   | `1`                      | スピーカー ID                                    |
+| `--preset`       |        |                          | プリセット ID（`--speaker` より優先）            |
+| `--output`       | `-o`   | `output.wav`             | 出力ファイルパス                                 |
+| `--host`         |        | `http://localhost:50021` | VoiceVox Engine の URL                           |
+| `--play`         | `-p`   | `false`                  | 合成後に再生                                     |
+| `--morph-target` |        |                          | モーフィング先スピーカー ID                      |
+| `--morph-rate`   |        | `0.5`                    | モーフィング率（0.0 = ベース、1.0 = ターゲット） |
 
 ### `voicevox speakers`
 
@@ -338,6 +342,9 @@ voicevox mcp --host http://localhost:50021
 | `update_setting`                 | エンジン設定を更新する                                               |
 | `list_singers`                   | 歌唱用キャラクターの一覧を返す                                       |
 | `sing`                           | 楽譜データから歌唱音声を合成して WAV ファイルを保存し、パスを返す    |
+| `multi_synthesize`               | 複数テキストを一括音声合成して1つの WAV ファイルを保存し、パスを返す |
+| `synthesis_morphing`             | 2スタイル間をモーフィングした音声を合成して WAV ファイルを保存する   |
+| `connect_waves`                  | 複数の WAV ファイルを結合して1つの WAV ファイルを保存し、パスを返す  |
 
 ### Claude Desktop への設定例
 

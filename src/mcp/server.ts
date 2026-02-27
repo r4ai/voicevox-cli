@@ -1,5 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { registerAccentPhraseTools } from "./tools/accent-phrases.js"
+import {
+  registerConnectWavesTool,
+  registerMultiSynthesizeTool,
+  registerSynthesisMorphingTool,
+} from "./tools/advanced-synthesis.js"
 import { registerAudioQueryTool } from "./tools/audio-query.js"
 import { registerEngineInfoTool } from "./tools/engine-info.js"
 import {
@@ -35,6 +40,9 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerSettingTools(server, defaultHost)
   registerListSingersTool(server, defaultHost)
   registerSingTool(server, defaultHost)
+  registerMultiSynthesizeTool(server, defaultHost)
+  registerSynthesisMorphingTool(server, defaultHost)
+  registerConnectWavesTool(server, defaultHost)
 
   return server
 }
