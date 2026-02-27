@@ -32,7 +32,7 @@ export interface MorphableTargetInfo {
 
 export interface ParseKanaBadRequest {
   error_name: string
-  error_args: { text: string }
+  error_args: Record<string, unknown>
 }
 
 export interface Mora {
