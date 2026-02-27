@@ -368,7 +368,7 @@ export class VoiceVoxClient {
     const html = await res.text()
 
     const corsPolicyModeMatch = html.match(/const corsPolicyMode = ref\(\s*"([^"]+)"/)
-    const allowOriginMatch = html.match(/const allowOrigin = ref\("([^"]*)"/)
+    const allowOriginMatch = html.match(/const allowOrigin = ref\(\s*"([^"]*)"/)
     if (!corsPolicyModeMatch || !allowOriginMatch) {
       throw new Error("GET /setting failed: could not parse setting values from HTML")
     }

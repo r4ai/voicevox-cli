@@ -254,6 +254,22 @@ describe("VoiceVoxClient.getSetting", () => {
     expect(result).toEqual(mockSetting)
   })
 
+  it("parses setting values when whitespace appears after ref(", async () => {
+    const mockSetting = {
+      cors_policy_mode: "localapps" as const,
+      allow_origin: "https://example.com",
+    }
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        '<script>const corsPolicyMode = ref( "localapps"); const allowOrigin = ref( "https://example.com");</script>',
+        { status: 200 },
+      ),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.getSetting()
+    expect(result).toEqual(mockSetting)
+  })
+
   it("throws on non-2xx status", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("", { status: 500, statusText: "Internal Server Error" }),
