@@ -1,4 +1,5 @@
-import { writeFile } from "node:fs/promises"
+import { randomUUID } from "node:crypto"
+import { mkdtemp, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -11,7 +12,8 @@ import {
 } from "./advanced-synthesis.js"
 
 async function writeTempWav(name: string, data: Buffer): Promise<string> {
-  const path = join(tmpdir(), name)
+  const dir = await mkdtemp(join(tmpdir(), "voicevox-test-"))
+  const path = join(dir, `${name}-${randomUUID()}.wav`)
   await writeFile(path, data)
   return path
 }

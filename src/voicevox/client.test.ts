@@ -444,6 +444,54 @@ describe("VoiceVoxClient.synthesisMorphing", () => {
   })
 })
 
+describe("VoiceVoxClient.cancellableSynthesize", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockQuery = {
+    accent_phrases: [],
+    speedScale: 1.0,
+    pitchScale: 0.0,
+    intonationScale: 1.0,
+    volumeScale: 1.0,
+    prePhonemeLength: 0.1,
+    postPhonemeLength: 0.1,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /cancellable_synthesis with speaker query param and query as body", async () => {
+    const mockBuffer = new ArrayBuffer(8)
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.cancellableSynthesize(mockQuery, 1)
+    expect(result).toBeInstanceOf(ArrayBuffer)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/cancellable_synthesis")
+    expect(calledUrl).toContain("speaker=1")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(mockQuery),
+      }),
+    )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.cancellableSynthesize(mockQuery, 1)).rejects.toThrow(
+      "POST /cancellable_synthesis failed: 422",
+    )
+  })
+})
+
 describe("VoiceVoxClient.connectWaves", () => {
   beforeEach(() => {
     vi.restoreAllMocks()

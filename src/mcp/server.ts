@@ -6,6 +6,7 @@ import {
   registerSynthesisMorphingTool,
 } from "./tools/advanced-synthesis.js"
 import { registerAudioQueryTool } from "./tools/audio-query.js"
+import { registerCancellableSynthesisTool } from "./tools/cancellable-synthesis.js"
 import { registerEngineInfoTool } from "./tools/engine-info.js"
 import {
   registerInitializeSpeakerTool,
@@ -43,6 +44,7 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerMultiSynthesizeTool(server, defaultHost)
   registerSynthesisMorphingTool(server, defaultHost)
   registerConnectWavesTool(server, defaultHost)
+  registerCancellableSynthesisTool(server, defaultHost)
 
   return server
 }

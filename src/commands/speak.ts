@@ -41,7 +41,6 @@ export const speakCommand = define({
     },
     "morph-rate": {
       type: "number",
-      default: 0.5,
       description: "Morphing rate between base and target speaker (0.0–1.0)",
     },
   },
@@ -60,6 +59,19 @@ export const speakCommand = define({
     const presetId = ctx.values.preset
     const morphTarget = ctx.values["morph-target"]
     const morphRate = ctx.values["morph-rate"] ?? 0.5
+
+    if (ctx.values["morph-rate"] !== undefined && morphTarget === undefined) {
+      console.error("Error: --morph-rate requires --morph-target")
+      process.exit(1)
+    }
+    if (morphRate < 0 || morphRate > 1) {
+      console.error("Error: --morph-rate must be between 0.0 and 1.0")
+      process.exit(1)
+    }
+    if (presetId !== undefined && morphTarget !== undefined) {
+      console.error("Error: --preset cannot be used with --morph-target")
+      process.exit(1)
+    }
 
     const client = new VoiceVoxClient(host)
 

@@ -387,6 +387,19 @@ export class VoiceVoxClient {
     return res.arrayBuffer()
   }
 
+  async cancellableSynthesize(query: AudioQuery, speaker: number): Promise<ArrayBuffer> {
+    const url = new URL(`${this.baseUrl}/cancellable_synthesis`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    })
+    if (!res.ok)
+      throw new Error(`POST /cancellable_synthesis failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
+  }
+
   async connectWaves(waves: string[]): Promise<ArrayBuffer> {
     const res = await fetch(`${this.baseUrl}/connect_waves`, {
       method: "POST",
