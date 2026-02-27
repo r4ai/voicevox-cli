@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import { writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
@@ -74,7 +75,8 @@ export function registerSingTool(server: McpServer, defaultHost: string): void {
         const query = await client.createSingFrameAudioQuery(args.score, args.singer)
         const wav = await client.frameSynthesis(query, args.singer)
 
-        const outputPath = args.output ?? join(tmpdir(), `voicevox-sing-${Date.now()}.wav`)
+        const outputPath =
+          args.output ?? join(tmpdir(), `voicevox-sing-${process.pid}-${randomUUID()}.wav`)
         await writeFile(outputPath, Buffer.from(wav))
 
         return {

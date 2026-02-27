@@ -88,6 +88,7 @@ describe("MCP list_singers", () => {
     await server.tools["list_singers"]({ host: "http://custom-host:9999" })
 
     const calledUrls = fetchMock.mock.calls.map(([url]) => String(url))
+    expect(calledUrls.length).toBeGreaterThan(0)
     expect(calledUrls.every((u) => u.startsWith("http://custom-host:9999"))).toBe(true)
   })
 })
@@ -143,7 +144,7 @@ describe("MCP sing", () => {
     })
 
     expect(result.isError).toBeUndefined()
-    expect(result.content[0].text).toMatch(/voicevox-sing-\d+\.wav$/)
+    expect(result.content[0].text).toMatch(/voicevox-sing-\d+-[\da-f-]{36}\.wav$/)
   })
 
   it("returns isError:true when query creation fails", async () => {
