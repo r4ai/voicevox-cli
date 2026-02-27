@@ -26,16 +26,35 @@ try {
   // Tag does not exist.
 }
 
+const branch = `chore/release-${tag}`
+
+// ブランチを作成してチェックアウト
+execSync(`git switch -c ${branch}`, { stdio: "inherit" })
+
+// package.json のバージョンを更新
 const packageJsonPath = new URL("../package.json", import.meta.url)
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"))
 packageJson.version = version
 writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8")
-
-execSync(`git tag ${tag}`, { stdio: "inherit" })
-
 console.log(`Updated package.json version to ${version}`)
+
+// コミット
+execSync(`git add package.json`, { stdio: "inherit" })
+execSync(`git commit -m "chore: release ${tag}"`, { stdio: "inherit" })
+console.log(`Committed package.json`)
+
+// タグを作成
+execSync(`git tag ${tag}`, { stdio: "inherit" })
 console.log(`Created git tag ${tag}`)
-console.log("Next steps:")
-console.log("  git add package.json")
-console.log(`  git commit -m "chore: release ${tag}"`)
-console.log("  git push && git push --tags")
+
+// プッシュ
+execSync(`git push origin ${branch}`, { stdio: "inherit" })
+execSync(`git push origin ${tag}`, { stdio: "inherit" })
+console.log(`Pushed branch ${branch} and tag ${tag}`)
+
+// PR を作成
+execSync(
+  `gh pr create --base main --title "chore: release ${tag}" --body "## Release ${tag}" --head ${branch}`,
+  { stdio: "inherit" },
+)
+console.log(`Created pull request for ${tag}`)
