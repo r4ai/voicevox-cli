@@ -1,5 +1,10 @@
 # voicevox-cli
 
+[![CI](https://github.com/r4ai/voicevox-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/r4ai/voicevox-cli/actions/workflows/ci.yml)
+[![Publish](https://github.com/r4ai/voicevox-cli/actions/workflows/publish.yml/badge.svg)](https://github.com/r4ai/voicevox-cli/actions/workflows/publish.yml)
+[![npm version](https://img.shields.io/npm/v/@r4ai/voicevox-cli)](https://www.npmjs.com/package/@r4ai/voicevox-cli)
+[![npm downloads](https://img.shields.io/npm/dm/@r4ai/voicevox-cli)](https://www.npmjs.com/package/@r4ai/voicevox-cli)
+
 [VoiceVox](https://voicevox.hiroshiba.jp/) の CLI ツールと MCP サーバー。
 
 ## 必要環境
