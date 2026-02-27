@@ -344,3 +344,184 @@ describe("VoiceVoxClient.updateSetting", () => {
     ).rejects.toThrow("POST /setting failed: 500")
   })
 })
+
+describe("VoiceVoxClient.multiSynthesize", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockQuery = {
+    accent_phrases: [],
+    speedScale: 1.0,
+    pitchScale: 0.0,
+    intonationScale: 1.0,
+    volumeScale: 1.0,
+    prePhonemeLength: 0.1,
+    postPhonemeLength: 0.1,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /multi_synthesis with speaker query param and query array as body", async () => {
+    const mockBuffer = new ArrayBuffer(8)
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const queries = [mockQuery, mockQuery]
+    const result = await client.multiSynthesize(queries, 1)
+    expect(result).toBeInstanceOf(ArrayBuffer)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/multi_synthesis")
+    expect(calledUrl).toContain("speaker=1")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(queries),
+      }),
+    )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.multiSynthesize([mockQuery], 1)).rejects.toThrow(
+      "POST /multi_synthesis failed: 422",
+    )
+  })
+})
+
+describe("VoiceVoxClient.synthesisMorphing", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockQuery = {
+    accent_phrases: [],
+    speedScale: 1.0,
+    pitchScale: 0.0,
+    intonationScale: 1.0,
+    volumeScale: 1.0,
+    prePhonemeLength: 0.1,
+    postPhonemeLength: 0.1,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /synthesis_morphing with base_speaker, target_speaker, morph_rate params and query as body", async () => {
+    const mockBuffer = new ArrayBuffer(8)
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.synthesisMorphing(mockQuery, 1, 2, 0.5)
+    expect(result).toBeInstanceOf(ArrayBuffer)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/synthesis_morphing")
+    expect(calledUrl).toContain("base_speaker=1")
+    expect(calledUrl).toContain("target_speaker=2")
+    expect(calledUrl).toContain("morph_rate=0.5")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(mockQuery),
+      }),
+    )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.synthesisMorphing(mockQuery, 1, 2, 0.5)).rejects.toThrow(
+      "POST /synthesis_morphing failed: 422",
+    )
+  })
+})
+
+describe("VoiceVoxClient.cancellableSynthesize", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mockQuery = {
+    accent_phrases: [],
+    speedScale: 1.0,
+    pitchScale: 0.0,
+    intonationScale: 1.0,
+    volumeScale: 1.0,
+    prePhonemeLength: 0.1,
+    postPhonemeLength: 0.1,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /cancellable_synthesis with speaker query param and query as body", async () => {
+    const mockBuffer = new ArrayBuffer(8)
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.cancellableSynthesize(mockQuery, 1)
+    expect(result).toBeInstanceOf(ArrayBuffer)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/cancellable_synthesis")
+    expect(calledUrl).toContain("speaker=1")
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(mockQuery),
+      }),
+    )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.cancellableSynthesize(mockQuery, 1)).rejects.toThrow(
+      "POST /cancellable_synthesis failed: 422",
+    )
+  })
+})
+
+describe("VoiceVoxClient.connectWaves", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("POSTs to /connect_waves with base64 wave array as body", async () => {
+    const mockBuffer = new ArrayBuffer(16)
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const waves = ["base64wav1==", "base64wav2=="]
+    const result = await client.connectWaves(waves)
+    expect(result).toBeInstanceOf(ArrayBuffer)
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:50021/connect_waves",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(waves),
+      }),
+    )
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 422, statusText: "Unprocessable Entity" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.connectWaves(["wav1==", "wav2=="])).rejects.toThrow(
+      "POST /connect_waves failed: 422",
+    )
+  })
+})

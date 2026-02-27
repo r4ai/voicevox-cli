@@ -355,4 +355,58 @@ export class VoiceVoxClient {
     if (!res.ok) throw new Error(`POST /frame_synthesis failed: ${res.status} ${res.statusText}`)
     return res.arrayBuffer()
   }
+
+  async multiSynthesize(queries: AudioQuery[], speaker: number): Promise<ArrayBuffer> {
+    const url = new URL(`${this.baseUrl}/multi_synthesis`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(queries),
+    })
+    if (!res.ok) throw new Error(`POST /multi_synthesis failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
+  }
+
+  async synthesisMorphing(
+    query: AudioQuery,
+    baseSpeaker: number,
+    targetSpeaker: number,
+    morphRate: number,
+  ): Promise<ArrayBuffer> {
+    const url = new URL(`${this.baseUrl}/synthesis_morphing`)
+    url.searchParams.set("base_speaker", String(baseSpeaker))
+    url.searchParams.set("target_speaker", String(targetSpeaker))
+    url.searchParams.set("morph_rate", String(morphRate))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    })
+    if (!res.ok) throw new Error(`POST /synthesis_morphing failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
+  }
+
+  async cancellableSynthesize(query: AudioQuery, speaker: number): Promise<ArrayBuffer> {
+    const url = new URL(`${this.baseUrl}/cancellable_synthesis`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    })
+    if (!res.ok)
+      throw new Error(`POST /cancellable_synthesis failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
+  }
+
+  async connectWaves(waves: string[]): Promise<ArrayBuffer> {
+    const res = await fetch(`${this.baseUrl}/connect_waves`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(waves),
+    })
+    if (!res.ok) throw new Error(`POST /connect_waves failed: ${res.status} ${res.statusText}`)
+    return res.arrayBuffer()
+  }
 }

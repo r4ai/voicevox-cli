@@ -35,6 +35,14 @@ export const speakCommand = define({
       type: "number",
       description: "Preset ID (use preset instead of --speaker)",
     },
+    "morph-target": {
+      type: "number",
+      description: "Target speaker ID for morphing",
+    },
+    "morph-rate": {
+      type: "number",
+      description: "Morphing rate between base and target speaker (0.0–1.0)",
+    },
   },
   run: async (ctx) => {
     const text = ctx.positionals[0]
@@ -49,6 +57,21 @@ export const speakCommand = define({
     const host = ctx.values.host ?? "http://localhost:50021"
     const shouldPlay = ctx.values.play ?? false
     const presetId = ctx.values.preset
+    const morphTarget = ctx.values["morph-target"]
+    const morphRate = ctx.values["morph-rate"] ?? 0.5
+
+    if (ctx.values["morph-rate"] !== undefined && morphTarget === undefined) {
+      console.error("Error: --morph-rate requires --morph-target")
+      process.exit(1)
+    }
+    if (morphRate < 0 || morphRate > 1) {
+      console.error("Error: --morph-rate must be between 0.0 and 1.0")
+      process.exit(1)
+    }
+    if (presetId !== undefined && morphTarget !== undefined) {
+      console.error("Error: --preset cannot be used with --morph-target")
+      process.exit(1)
+    }
 
     const client = new VoiceVoxClient(host)
 
@@ -63,6 +86,9 @@ export const speakCommand = define({
         }
         const query = await client.createAudioQueryFromPreset(text, presetId)
         wav = await client.synthesize(query, preset.style_id)
+      } else if (morphTarget !== undefined) {
+        const query = await client.createAudioQuery(text, speaker)
+        wav = await client.synthesisMorphing(query, speaker, morphTarget, morphRate)
       } else {
         const query = await client.createAudioQuery(text, speaker)
         wav = await client.synthesize(query, speaker)
