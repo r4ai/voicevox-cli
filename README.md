@@ -318,6 +318,52 @@ voicevox mcp
 voicevox mcp --host http://localhost:50021
 ```
 
+### `voicevox complete <shell>`
+
+シェル補完スクリプトを生成します。対応シェル: `bash` / `zsh` / `fish` / `powershell`
+
+```bash
+voicevox complete bash
+voicevox complete zsh
+voicevox complete fish
+voicevox complete powershell
+```
+
+#### セットアップ
+
+**Bash**
+
+```bash
+# 現在のセッションで有効化
+source <(voicevox complete bash)
+
+# 永続化（~/.bashrc に追記）
+echo 'source <(voicevox complete bash)' >> ~/.bashrc
+```
+
+**Zsh**
+
+```zsh
+# 現在のセッションで有効化
+source <(voicevox complete zsh)
+
+# 永続化（~/.zshrc に追記）
+echo 'source <(voicevox complete zsh)' >> ~/.zshrc
+```
+
+**Fish**
+
+```fish
+voicevox complete fish > ~/.config/fish/completions/voicevox.fish
+```
+
+**PowerShell**
+
+```powershell
+# $PROFILE に追記して永続化
+voicevox complete powershell >> $PROFILE
+```
+
 ## MCP サーバー
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
