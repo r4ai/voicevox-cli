@@ -7,19 +7,17 @@
 - Node.js 24+
 - [VoiceVox Engine](https://github.com/VOICEVOX/voicevox_engine) (デフォルト: `http://localhost:50021`)
 
-`.tool-versions` を使う場合は `asdf install` または `mise install` で Node.js を揃えてください。
-
 ## インストール
 
 ```bash
-pnpm install
-pnpm build
-```
+# npm
+npm install -g @r4ai/voicevox-cli
 
-ビルド後、`dist/cli.js` を使うか、グローバルにリンクして使用します。
+# pnpm
+pnpm add -g @r4ai/voicevox-cli
 
-```bash
-pnpm link --global
+# yarn
+yarn global add @r4ai/voicevox-cli
 ```
 
 ## CLI
@@ -365,6 +363,13 @@ voicevox mcp --host http://localhost:50021
 ```
 
 ## 開発
+
+`.tool-versions` を使う場合は `asdf install` または `mise install` で Node.js を揃えてください。
+
+```bash
+pnpm install
+pnpm build
+```
 
 ```bash
 pnpm dev        # ウォッチモードでビルド
