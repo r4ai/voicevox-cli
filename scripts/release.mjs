@@ -39,6 +39,9 @@ const run = (command, args, options = {}) =>
   execFileSync(command, args, { stdio: "inherit", ...options })
 const tag = `v${version}`
 const branch = `chore/release-${tag}`
+let branchCreated = false
+let packageVersionUpdated = false
+let tagCreated = false
 
 const packageJsonPath = new URL("../package.json", import.meta.url)
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"))
@@ -67,53 +70,75 @@ try {
 }
 
 // ブランチを作成してチェックアウト
-run("git", ["switch", "-c", branch])
+try {
+  run("git", ["switch", "-c", branch])
+  branchCreated = true
 
-// package.json のバージョンを更新
-packageJson.version = version
-writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8")
-console.log(`Updated package.json version to ${version}`)
+  // package.json のバージョンを更新
+  packageJson.version = version
+  writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8")
+  packageVersionUpdated = true
+  console.log(`Updated package.json version to ${version}`)
 
-// コミット
-run("git", ["add", "package.json"])
-run("git", ["commit", "-m", `chore: release ${tag}`])
-console.log(`Committed package.json`)
+  // コミット
+  run("git", ["add", "package.json"])
+  run("git", ["commit", "-m", `chore: release ${tag}`])
+  packageVersionUpdated = false
+  console.log(`Committed package.json`)
 
-// タグを作成
-run("git", ["tag", tag])
-console.log(`Created git tag ${tag}`)
+  // タグを作成
+  run("git", ["tag", tag])
+  tagCreated = true
+  console.log(`Created git tag ${tag}`)
 
-// プッシュ確認
-const doPush = await confirm(`Push branch '${branch}' and tag '${tag}' to origin?`)
-if (!doPush) {
-  console.log("Aborted. You can push manually:")
-  console.log(`  git push origin ${branch}`)
-  console.log(`  git push origin refs/tags/${tag}`)
-  process.exit(0)
+  // プッシュ確認
+  const doPush = await confirm(`Push branch '${branch}' and tag '${tag}' to origin?`)
+  if (!doPush) {
+    console.log("Aborted. You can push manually:")
+    console.log(`  git push origin ${branch}`)
+    console.log(`  git push origin refs/tags/${tag}`)
+    console.log("To rerun this script, clean up the local release artifacts first:")
+    console.log(`  git tag -d ${tag}`)
+    console.log(`  git switch main && git branch -D ${branch}`)
+    process.exit(0)
+  }
+
+  run("git", ["push", "origin", branch])
+  run("git", ["push", "origin", `refs/tags/${tag}`])
+  console.log(`Pushed branch ${branch} and tag ${tag}`)
+
+  // PR 作成確認
+  const doPR = await confirm(`Create a pull request for '${branch}' into main?`)
+  if (!doPR) {
+    console.log("Aborted. You can create the PR manually:")
+    console.log(`  gh pr create --base main --head ${branch} --title "chore: release ${tag}"`)
+    process.exit(0)
+  }
+
+  run("gh", [
+    "pr",
+    "create",
+    "--base",
+    "main",
+    "--title",
+    `chore: release ${tag}`,
+    "--body",
+    `## Release ${tag}`,
+    "--head",
+    branch,
+  ])
+  console.log(`Created pull request for ${tag}`)
+} catch {
+  console.error("Release process failed. Please review the error output above.")
+  console.error("If you want to retry, clean up any partially created artifacts:")
+  if (packageVersionUpdated) {
+    console.error("  git restore package.json")
+  }
+  if (tagCreated) {
+    console.error(`  git tag -d ${tag}`)
+  }
+  if (branchCreated) {
+    console.error(`  git switch main && git branch -D ${branch}`)
+  }
+  process.exit(1)
 }
-
-run("git", ["push", "origin", branch])
-run("git", ["push", "origin", `refs/tags/${tag}`])
-console.log(`Pushed branch ${branch} and tag ${tag}`)
-
-// PR 作成確認
-const doPR = await confirm(`Create a pull request for '${branch}' into main?`)
-if (!doPR) {
-  console.log("Aborted. You can create the PR manually:")
-  console.log(`  gh pr create --base main --head ${branch} --title "chore: release ${tag}"`)
-  process.exit(0)
-}
-
-run("gh", [
-  "pr",
-  "create",
-  "--base",
-  "main",
-  "--title",
-  `chore: release ${tag}`,
-  "--body",
-  `## Release ${tag}`,
-  "--head",
-  branch,
-])
-console.log(`Created pull request for ${tag}`)
