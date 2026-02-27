@@ -37,31 +37,96 @@ describe("VoiceVoxClient.getMorphableTargets", () => {
     vi.restoreAllMocks()
   })
 
-  it("POSTs to /morphable_targets with the speaker array as body", async () => {
+  it("POSTs to /morphable_targets with base style IDs as body", async () => {
     const mockResult = [{ "0": { is_morphable: true } }]
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response(JSON.stringify(mockResult), { status: 200 }))
     const client = new VoiceVoxClient("http://localhost:50021")
-    const speakers = [
-      [
-        {
-          name: "Test Speaker",
-          speaker_uuid: "uuid-1",
-          styles: [{ name: "Normal", id: 0 }],
-          supported_features: { permitted_synthesis_morphing: "ALL" as const },
-        },
-      ],
-    ]
-    const result = await client.getMorphableTargets(speakers)
+    const baseStyleIds = [0, 1]
+    const result = await client.getMorphableTargets(baseStyleIds, { coreVersion: "0.15.0" })
     expect(result).toEqual(mockResult)
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("/morphable_targets")
+    expect(calledUrl).toContain("core_version=0.15.0")
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:50021/morphable_targets",
+      expect.anything(),
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify(speakers),
+        body: JSON.stringify(baseStyleIds),
       }),
     )
+  })
+})
+
+describe("VoiceVoxClient.getPortalPage", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("GETs / and returns the portal HTML", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("<html>Portal</html>", { status: 200 }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getPortalPage()).resolves.toBe("<html>Portal</html>")
+  })
+
+  it("throws on non-2xx status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 500, statusText: "Internal Server Error" }),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await expect(client.getPortalPage()).rejects.toThrow("GET / failed: 500")
+  })
+})
+
+describe("VoiceVoxClient query params", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("sends enable_katakana_english and core_version for audio_query", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("{}", { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+
+    await client.createAudioQuery("こんにちは", 1, {
+      enableKatakanaEnglish: false,
+      coreVersion: "0.15.0",
+    })
+
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("enable_katakana_english=false")
+    expect(calledUrl).toContain("core_version=0.15.0")
+  })
+
+  it("sends enable_interrogative_upspeak and core_version for synthesis", async () => {
+    const mockQuery = {
+      accent_phrases: [],
+      speedScale: 1.0,
+      pitchScale: 0.0,
+      intonationScale: 1.0,
+      volumeScale: 1.0,
+      prePhonemeLength: 0.1,
+      postPhonemeLength: 0.1,
+      outputSamplingRate: 24000,
+      outputStereo: false,
+    }
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(new ArrayBuffer(8), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+
+    await client.synthesize(mockQuery, 1, {
+      enableInterrogativeUpspeak: false,
+      coreVersion: "0.15.0",
+    })
+
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("enable_interrogative_upspeak=false")
+    expect(calledUrl).toContain("core_version=0.15.0")
   })
 })
 
@@ -157,6 +222,18 @@ describe("VoiceVoxClient.getSupportedDevices", () => {
     const client = new VoiceVoxClient("http://localhost:50021")
     await expect(client.getSupportedDevices()).rejects.toThrow("GET /supported_devices failed: 500")
   })
+
+  it("includes core_version query param when provided", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ cpu: true, cuda: false, dml: false }), { status: 200 }),
+      )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await client.getSupportedDevices({ coreVersion: "0.15.0" })
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("core_version=0.15.0")
+  })
 })
 
 describe("VoiceVoxClient.getSetting", () => {
@@ -211,6 +288,16 @@ describe("VoiceVoxClient.getSingerInfo", () => {
     expect(calledUrl).toContain("resource_format=url")
   })
 
+  it("includes core_version query param when provided", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await client.getSingerInfo("test-uuid", "base64", { coreVersion: "0.15.0" })
+    const calledUrl = String(fetchMock.mock.calls[0][0])
+    expect(calledUrl).toContain("core_version=0.15.0")
+  })
+
   it("throws on non-200 status", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("", { status: 404, statusText: "Not Found" }),
@@ -231,22 +318,34 @@ describe("VoiceVoxClient.getSingFrameF0", () => {
     time_signatures: [{ measure_count: 1, beat_type: 4, beats: 4 }],
   }
 
-  it("POSTs to /sing_frame_f0 with speaker query param and score as body", async () => {
+  const mockQuery = {
+    f0: [440.0],
+    volume: [1.0],
+    phonemes: [{ phoneme: "d", frame_length: 5 }],
+    volumeScale: 1.0,
+    outputSamplingRate: 24000,
+    outputStereo: false,
+  }
+
+  it("POSTs to /sing_frame_f0 with speaker query param and {score, frame_audio_query} as body", async () => {
     const mockF0 = [440.0, 440.0, 0.0]
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response(JSON.stringify(mockF0), { status: 200 }))
     const client = new VoiceVoxClient("http://localhost:50021")
-    const result = await client.getSingFrameF0(mockScore, 6000)
+    const result = await client.getSingFrameF0(mockScore, 6000, mockQuery, {
+      coreVersion: "0.15.0",
+    })
     expect(result).toEqual(mockF0)
     const calledUrl = String(fetchMock.mock.calls[0][0])
     expect(calledUrl).toContain("/sing_frame_f0")
     expect(calledUrl).toContain("speaker=6000")
+    expect(calledUrl).toContain("core_version=0.15.0")
     expect(fetchMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify(mockScore),
+        body: JSON.stringify({ score: mockScore, frame_audio_query: mockQuery }),
       }),
     )
   })
@@ -256,7 +355,7 @@ describe("VoiceVoxClient.getSingFrameF0", () => {
       new Response("", { status: 422, statusText: "Unprocessable Entity" }),
     )
     const client = new VoiceVoxClient("http://localhost:50021")
-    await expect(client.getSingFrameF0(mockScore, 6000)).rejects.toThrow(
+    await expect(client.getSingFrameF0(mockScore, 6000, mockQuery)).rejects.toThrow(
       "POST /sing_frame_f0 failed: 422",
     )
   })
@@ -318,19 +417,35 @@ describe("VoiceVoxClient.updateSetting", () => {
     vi.restoreAllMocks()
   })
 
-  it("POSTs to /setting with the setting as JSON body", async () => {
+  it("POSTs to /setting as application/x-www-form-urlencoded", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response("", { status: 200 }))
     const client = new VoiceVoxClient("http://localhost:50021")
     const setting = { cors_policy_mode: "localapps" as const, allow_origin: null }
     await client.updateSetting(setting)
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:50021/setting",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify(setting),
-      }),
+    const requestInit = fetchMock.mock.calls[0][1]
+    expect(requestInit).toBeDefined()
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:50021/setting", expect.anything())
+    expect(requestInit).toMatchObject({
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    })
+    expect(((requestInit as RequestInit).body as URLSearchParams).toString()).toBe(
+      "cors_policy_mode=localapps&allow_origin=",
+    )
+  })
+
+  it("omits allow_origin when not provided", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("", { status: 200 }))
+    const client = new VoiceVoxClient("http://localhost:50021")
+    await client.updateSetting({ cors_policy_mode: "all" })
+    const requestInit = fetchMock.mock.calls[0][1]
+    expect(requestInit).toBeDefined()
+    expect(((requestInit as RequestInit).body as URLSearchParams).toString()).toBe(
+      "cors_policy_mode=all",
     )
   })
 
@@ -369,11 +484,16 @@ describe("VoiceVoxClient.multiSynthesize", () => {
       .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
     const client = new VoiceVoxClient("http://localhost:50021")
     const queries = [mockQuery, mockQuery]
-    const result = await client.multiSynthesize(queries, 1)
+    const result = await client.multiSynthesize(queries, 1, {
+      enableInterrogativeUpspeak: false,
+      coreVersion: "0.15.0",
+    })
     expect(result).toBeInstanceOf(ArrayBuffer)
     const calledUrl = String(fetchMock.mock.calls[0][0])
     expect(calledUrl).toContain("/multi_synthesis")
     expect(calledUrl).toContain("speaker=1")
+    expect(calledUrl).toContain("enable_interrogative_upspeak=false")
+    expect(calledUrl).toContain("core_version=0.15.0")
     expect(fetchMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -467,11 +587,16 @@ describe("VoiceVoxClient.cancellableSynthesize", () => {
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response(mockBuffer, { status: 200 }))
     const client = new VoiceVoxClient("http://localhost:50021")
-    const result = await client.cancellableSynthesize(mockQuery, 1)
+    const result = await client.cancellableSynthesize(mockQuery, 1, {
+      enableInterrogativeUpspeak: false,
+      coreVersion: "0.15.0",
+    })
     expect(result).toBeInstanceOf(ArrayBuffer)
     const calledUrl = String(fetchMock.mock.calls[0][0])
     expect(calledUrl).toContain("/cancellable_synthesis")
     expect(calledUrl).toContain("speaker=1")
+    expect(calledUrl).toContain("enable_interrogative_upspeak=false")
+    expect(calledUrl).toContain("core_version=0.15.0")
     expect(fetchMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

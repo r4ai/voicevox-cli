@@ -11,11 +11,11 @@ export function registerMultiSynthesizeTool(server: McpServer, defaultHost: stri
     "multi_synthesize",
     {
       description:
-        "Synthesize multiple Japanese texts to speech in a single request and save them as a single concatenated WAV file. Returns the output file path.",
+        "Synthesize multiple Japanese texts to speech in a single request and save the returned ZIP archive. Returns the output file path.",
       inputSchema: {
         texts: z.array(z.string()).min(1).describe("List of texts to synthesize"),
         speaker: z.number().int().default(1).describe("Speaker ID"),
-        output: z.string().optional().describe("Output WAV file path (defaults to a temp file)"),
+        output: z.string().optional().describe("Output ZIP file path (defaults to a temp file)"),
         host: z.string().default(defaultHost).describe("VoiceVox engine URL"),
       },
     },
@@ -25,11 +25,11 @@ export function registerMultiSynthesizeTool(server: McpServer, defaultHost: stri
         const queries = await Promise.all(
           args.texts.map((text) => client.createAudioQuery(text, args.speaker)),
         )
-        const wav = await client.multiSynthesize(queries, args.speaker)
+        const zip = await client.multiSynthesize(queries, args.speaker)
 
         const outputPath =
-          args.output ?? join(tmpdir(), `voicevox-multi-${Date.now()}-${randomUUID()}.wav`)
-        await writeFile(outputPath, Buffer.from(wav))
+          args.output ?? join(tmpdir(), `voicevox-multi-${Date.now()}-${randomUUID()}.zip`)
+        await writeFile(outputPath, Buffer.from(zip))
 
         return {
           content: [{ type: "text", text: outputPath }],

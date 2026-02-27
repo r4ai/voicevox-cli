@@ -342,7 +342,7 @@ voicevox mcp --host http://localhost:50021
 | `update_setting`                 | エンジン設定を更新する                                                            |
 | `list_singers`                   | 歌唱用キャラクターの一覧を返す                                                    |
 | `sing`                           | 楽譜データから歌唱音声を合成して WAV ファイルを保存し、パスを返す                 |
-| `multi_synthesize`               | 複数テキストを一括音声合成して1つの WAV ファイルを保存し、パスを返す              |
+| `multi_synthesize`               | 複数テキストを一括音声合成して ZIP ファイルを保存し、パスを返す                   |
 | `synthesis_morphing`             | 2スタイル間をモーフィングした音声を合成して WAV ファイルを保存する                |
 | `connect_waves`                  | 複数の WAV ファイルを結合して1つの WAV ファイルを保存し、パスを返す               |
 | `cancellable_synthesize`         | キャンセル可能な合成エンドポイントでテキストを音声合成して WAV ファイルを保存する |

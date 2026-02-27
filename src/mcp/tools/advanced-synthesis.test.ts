@@ -62,11 +62,11 @@ describe("MCP multi_synthesize", () => {
       host: "http://localhost:50021",
       texts: ["こんにちは", "さようなら"],
       speaker: 1,
-      output: "/tmp/test-multi.wav",
+      output: "/tmp/test-multi.zip",
     })
 
     expect(result.isError).toBeUndefined()
-    expect(result.content[0].text).toBe("/tmp/test-multi.wav")
+    expect(result.content[0].text).toBe("/tmp/test-multi.zip")
     expect(VoiceVoxClient.prototype.createAudioQuery).toHaveBeenCalledTimes(2)
     expect(VoiceVoxClient.prototype.createAudioQuery).toHaveBeenCalledWith("こんにちは", 1)
     expect(VoiceVoxClient.prototype.createAudioQuery).toHaveBeenCalledWith("さようなら", 1)
@@ -90,7 +90,7 @@ describe("MCP multi_synthesize", () => {
     })
 
     expect(result.isError).toBeUndefined()
-    expect(result.content[0].text).toMatch(/voicevox-multi-\d+-[\da-f-]{36}\.wav$/)
+    expect(result.content[0].text).toMatch(/voicevox-multi-\d+-[\da-f-]{36}\.zip$/)
   })
 
   it("returns isError:true when audio query creation fails", async () => {
