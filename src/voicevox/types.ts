@@ -87,3 +87,56 @@ export interface UserDictWord {
   priority: number
   mora_count?: number
 }
+
+export interface UpdateInfo {
+  version: string
+  descriptions: string[]
+  contributors: string[]
+}
+
+export interface DependencyLicense {
+  name: string
+  version?: string
+  license?: string
+  text: string
+}
+
+export interface SupportedEngineFeatures {
+  adjust_mora_pitch: boolean
+  adjust_phoneme_length: boolean
+  adjust_speed_scale: boolean
+  adjust_pitch_scale: boolean
+  adjust_intonation_scale: boolean
+  adjust_volume_scale: boolean
+  interrogative_upspeak: boolean
+  synthesis_morphing: boolean
+  [key: string]: boolean
+}
+
+export interface EngineManifest {
+  manifest_version: string
+  name: string
+  brand_name: string
+  uuid: string
+  url: string
+  icon: string
+  default_sampling_rate: number
+  frame_rate: number
+  terms_of_service: string
+  update_infos: UpdateInfo[]
+  dependency_licenses: DependencyLicense[]
+  supported_features: SupportedEngineFeatures
+}
+
+export interface SupportedDevices {
+  cpu: boolean
+  cuda: boolean
+  dml: boolean
+}
+
+export type CorsPolicyMode = "localapps" | "all"
+
+export interface EngineSetting {
+  cors_policy_mode: CorsPolicyMode
+  allow_origin: string | null
+}

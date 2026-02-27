@@ -1,11 +1,14 @@
 import type {
   AccentPhrase,
   AudioQuery,
+  EngineSetting,
+  EngineManifest,
   MorphableTargetInfo,
   ParseKanaBadRequest,
   Preset,
   Speaker,
   SpeakerSupportPermittedSynthesisMorphing,
+  SupportedDevices,
   UserDictWord,
 } from "./types.js"
 
@@ -215,5 +218,38 @@ export class VoiceVoxClient {
       body: JSON.stringify(dictData),
     })
     if (!res.ok) throw new Error(`POST /import_user_dict failed: ${res.status} ${res.statusText}`)
+  }
+
+  async getEngineManifest(): Promise<EngineManifest> {
+    const res = await fetch(`${this.baseUrl}/engine_manifest`)
+    if (!res.ok) throw new Error(`GET /engine_manifest failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<EngineManifest>
+  }
+
+  async getCoreVersions(): Promise<string[]> {
+    const res = await fetch(`${this.baseUrl}/core_versions`)
+    if (!res.ok) throw new Error(`GET /core_versions failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<string[]>
+  }
+
+  async getSupportedDevices(): Promise<SupportedDevices> {
+    const res = await fetch(`${this.baseUrl}/supported_devices`)
+    if (!res.ok) throw new Error(`GET /supported_devices failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<SupportedDevices>
+  }
+
+  async getSetting(): Promise<EngineSetting> {
+    const res = await fetch(`${this.baseUrl}/setting`)
+    if (!res.ok) throw new Error(`GET /setting failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<EngineSetting>
+  }
+
+  async updateSetting(setting: EngineSetting): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/setting`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(setting),
+    })
+    if (!res.ok) throw new Error(`POST /setting failed: ${res.status} ${res.statusText}`)
   }
 }
