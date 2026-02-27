@@ -2,13 +2,28 @@
 
 import { readFileSync, writeFileSync } from "node:fs"
 import { execSync } from "node:child_process"
+import { createInterface } from "node:readline"
 
-const version = process.argv[2]
+const args = process.argv.slice(2)
+const yesAll = args.includes("--yes") || args.includes("-y")
+const version = args.find((a) => !a.startsWith("-"))
 
 if (!version) {
-  console.error("Usage: node scripts/release.mjs <version>")
+  console.error("Usage: node scripts/release.mjs <version> [--yes|-y]")
   console.error("Example: node scripts/release.mjs 0.1.1")
+  console.error("         node scripts/release.mjs 0.1.1 --yes")
   process.exit(1)
+}
+
+const confirm = async (message) => {
+  if (yesAll) return true
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  return new Promise((resolve) => {
+    rl.question(`${message} [y/N] `, (answer) => {
+      rl.close()
+      resolve(answer.toLowerCase() === "y")
+    })
+  })
 }
 
 if (!/^[0-9]+\.[0-9]+\.[0-9]+(-.+)?$/.test(version)) {
@@ -47,12 +62,27 @@ console.log(`Committed package.json`)
 execSync(`git tag ${tag}`, { stdio: "inherit" })
 console.log(`Created git tag ${tag}`)
 
-// プッシュ
+// プッシュ確認
+const doPush = await confirm(`Push branch '${branch}' and tag '${tag}' to origin?`)
+if (!doPush) {
+  console.log("Aborted. You can push manually:")
+  console.log(`  git push origin ${branch}`)
+  console.log(`  git push origin ${tag}`)
+  process.exit(0)
+}
+
 execSync(`git push origin ${branch}`, { stdio: "inherit" })
 execSync(`git push origin ${tag}`, { stdio: "inherit" })
 console.log(`Pushed branch ${branch} and tag ${tag}`)
 
-// PR を作成
+// PR 作成確認
+const doPR = await confirm(`Create a pull request for '${branch}' into main?`)
+if (!doPR) {
+  console.log("Aborted. You can create the PR manually:")
+  console.log(`  gh pr create --base main --head ${branch} --title "chore: release ${tag}"`)
+  process.exit(0)
+}
+
 execSync(
   `gh pr create --base main --title "chore: release ${tag}" --body "## Release ${tag}" --head ${branch}`,
   { stdio: "inherit" },
