@@ -134,6 +134,19 @@ export interface SupportedDevices {
   dml: boolean
 }
 
+export interface StyleInfo {
+  id: number
+  icon: string
+  portrait?: string
+  voice_samples: string[]
+}
+
+export interface SpeakerInfo {
+  policy: string
+  portrait: string
+  style_infos: StyleInfo[]
+}
+
 export type CorsPolicyMode = "localapps" | "all"
 
 export interface EngineSetting {

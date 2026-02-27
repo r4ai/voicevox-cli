@@ -46,13 +46,55 @@ voicevox speak "こんにちは" --play   # 合成後に再生
 
 ```bash
 voicevox speakers
-voicevox speakers --json   # JSON で出力
+voicevox speakers --json        # JSON で出力
+voicevox speakers --info        # バージョン・モーフィング対応・スタイル種別も表示
+```
+
+| オプション | デフォルト               | 説明                                             |
+| ---------- | ------------------------ | ------------------------------------------------ |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL                           |
+| `--json`   | `false`                  | JSON で出力                                      |
+| `--info`   | `false`                  | バージョン・モーフィング対応・スタイル種別を表示 |
+
+### `voicevox speaker-info <uuid>`
+
+スピーカーの詳細情報（利用ポリシー・アイコン・音声サンプル）を表示します。
+
+```bash
+voicevox speaker-info <speaker-uuid>
+voicevox speaker-info <speaker-uuid> --json   # JSON で出力
 ```
 
 | オプション | デフォルト               | 説明                   |
 | ---------- | ------------------------ | ---------------------- |
 | `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
 | `--json`   | `false`                  | JSON で出力            |
+
+### `voicevox initialize-speaker <id>`
+
+スピーカーの音声モデルをメモリに読み込みます。合成前に未初期化のスピーカーを使用する場合に呼び出します。
+
+```bash
+voicevox initialize-speaker 1
+voicevox initialize-speaker 1 --skip-reinit   # 初期化済みならスキップ
+```
+
+| オプション      | デフォルト               | 説明                                 |
+| --------------- | ------------------------ | ------------------------------------ |
+| `--skip-reinit` | `false`                  | 初期化済みの場合は再初期化をスキップ |
+| `--host`        | `http://localhost:50021` | VoiceVox Engine の URL               |
+
+### `voicevox is-initialized-speaker <id>`
+
+スピーカーが初期化済みかどうかを確認します。
+
+```bash
+voicevox is-initialized-speaker 1   # true または false を出力
+```
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--host`   | `http://localhost:50021` | VoiceVox Engine の URL |
 
 ### `voicevox query <text>`
 
@@ -260,6 +302,9 @@ voicevox mcp --host http://localhost:50021
 | ツール名                         | 説明                                                                 |
 | -------------------------------- | -------------------------------------------------------------------- |
 | `list_speakers`                  | 利用可能なスピーカーの一覧を返す                                     |
+| `get_speaker_info`               | スピーカーの詳細情報（ポリシー・アイコン・音声サンプル）を取得する   |
+| `initialize_speaker`             | スピーカーの音声モデルをメモリに読み込む                             |
+| `is_initialized_speaker`         | スピーカーが初期化済みかどうかを確認する                             |
 | `audio_query`                    | テキストの AudioQuery JSON を返す                                    |
 | `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す              |
 | `get_accent_phrases`             | テキストからアクセント句を取得する                                   |

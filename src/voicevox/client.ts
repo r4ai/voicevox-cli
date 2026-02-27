@@ -7,6 +7,7 @@ import type {
   ParseKanaBadRequest,
   Preset,
   Speaker,
+  SpeakerInfo,
   SpeakerSupportPermittedSynthesisMorphing,
   SupportedDevices,
   UserDictWord,
@@ -14,6 +15,35 @@ import type {
 
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
+
+  async getSpeakerInfo(
+    speakerUuid: string,
+    resourceFormat?: "base64" | "url",
+  ): Promise<SpeakerInfo> {
+    const url = new URL(`${this.baseUrl}/speaker_info`)
+    url.searchParams.set("speaker_uuid", speakerUuid)
+    if (resourceFormat) url.searchParams.set("resource_format", resourceFormat)
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`GET /speaker_info failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<SpeakerInfo>
+  }
+
+  async initializeSpeaker(speaker: number, skipReinit?: boolean): Promise<void> {
+    const url = new URL(`${this.baseUrl}/initialize_speaker`)
+    url.searchParams.set("speaker", String(speaker))
+    if (skipReinit !== undefined) url.searchParams.set("skip_reinit", String(skipReinit))
+    const res = await fetch(url, { method: "POST" })
+    if (!res.ok) throw new Error(`POST /initialize_speaker failed: ${res.status} ${res.statusText}`)
+  }
+
+  async isInitializedSpeaker(speaker: number): Promise<boolean> {
+    const url = new URL(`${this.baseUrl}/is_initialized_speaker`)
+    url.searchParams.set("speaker", String(speaker))
+    const res = await fetch(url)
+    if (!res.ok)
+      throw new Error(`GET /is_initialized_speaker failed: ${res.status} ${res.statusText}`)
+    return res.json() as Promise<boolean>
+  }
 
   async getSpeakers(): Promise<Speaker[]> {
     const res = await fetch(`${this.baseUrl}/speakers`)

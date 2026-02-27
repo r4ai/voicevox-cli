@@ -16,10 +16,16 @@ export const speakersCommand = define({
       default: false,
       description: "Output as JSON",
     },
+    info: {
+      type: "boolean",
+      default: false,
+      description: "Show extended info (version, morphing support, style type)",
+    },
   },
   run: async (ctx) => {
     const host = ctx.values.host ?? "http://localhost:50021"
     const asJson = ctx.values.json ?? false
+    const showInfo = ctx.values.info ?? false
     const client = new VoiceVoxClient(host)
 
     let speakers
@@ -27,6 +33,7 @@ export const speakersCommand = define({
       speakers = await client.getSpeakers()
     } catch (err) {
       handleCommandError(err, host)
+      return
     }
 
     if (asJson) {
@@ -35,9 +42,14 @@ export const speakersCommand = define({
     }
 
     for (const speaker of speakers) {
-      console.log(`${speaker.name} (uuid: ${speaker.speaker_uuid})`)
+      const versionStr = showInfo && speaker.version ? ` v${speaker.version}` : ""
+      console.log(`${speaker.name}${versionStr} (uuid: ${speaker.speaker_uuid})`)
+      if (showInfo && speaker.supported_features) {
+        console.log(`  morphing: ${speaker.supported_features.permitted_synthesis_morphing}`)
+      }
       for (const style of speaker.styles) {
-        console.log(`  - [${style.id}] ${style.name}`)
+        const typeStr = showInfo && style.type ? ` [${style.type}]` : ""
+        console.log(`  - [${style.id}] ${style.name}${typeStr}`)
       }
     }
   },
