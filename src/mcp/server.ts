@@ -7,7 +7,11 @@ import {
 } from "./tools/advanced-synthesis.js"
 import { registerAudioQueryTool } from "./tools/audio-query.js"
 import { registerCancellableSynthesisTool } from "./tools/cancellable-synthesis.js"
-import { registerEngineInfoTool } from "./tools/engine-info.js"
+import {
+  registerEngineInfoTool,
+  registerEngineLicensesTool,
+  registerEngineUpdateHistoryTool,
+} from "./tools/engine-info.js"
 import {
   registerInitializeSpeakerTool,
   registerIsInitializedSpeakerTool,
@@ -38,6 +42,8 @@ export function createMcpServer(defaultHost: string): McpServer {
   registerPresetTools(server, defaultHost)
   registerUtilityTools(server, defaultHost)
   registerEngineInfoTool(server, defaultHost)
+  registerEngineLicensesTool(server, defaultHost)
+  registerEngineUpdateHistoryTool(server, defaultHost)
   registerSettingTools(server, defaultHost)
   registerListSingersTool(server, defaultHost)
   registerSingTool(server, defaultHost)

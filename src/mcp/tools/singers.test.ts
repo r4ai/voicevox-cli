@@ -46,21 +46,46 @@ const MOCK_FRAME_AUDIO_QUERY: FrameAudioQuery = {
   outputStereo: false,
 }
 
+const MOCK_SINGERS_WITH_FEATURES = MOCK_SINGERS.map((s) => ({
+  ...s,
+  supported_features: { permitted_synthesis_morphing: "ALL" as const },
+}))
+
 describe("MCP list_singers", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
   })
 
-  it("returns singers list as JSON", async () => {
-    vi.spyOn(VoiceVoxClient.prototype, "getSingers").mockResolvedValue(MOCK_SINGERS)
+  it("excludes supported_features by default", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSingers").mockResolvedValue(MOCK_SINGERS_WITH_FEATURES)
 
     const server = buildMockServer()
     registerListSingersTool(server as never, "http://localhost:50021")
 
-    const result = await server.tools["list_singers"]({ host: "http://localhost:50021" })
+    const result = await server.tools["list_singers"]({
+      host: "http://localhost:50021",
+      include_supported_features: false,
+    })
 
     expect(result.isError).toBeUndefined()
-    expect(JSON.parse(result.content[0].text)).toEqual(MOCK_SINGERS)
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed[0].supported_features).toBeUndefined()
+    expect(parsed[0].name).toBe(MOCK_SINGERS[0].name)
+  })
+
+  it("includes supported_features when include_supported_features=true", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSingers").mockResolvedValue(MOCK_SINGERS_WITH_FEATURES)
+
+    const server = buildMockServer()
+    registerListSingersTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["list_singers"]({
+      host: "http://localhost:50021",
+      include_supported_features: true,
+    })
+
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed[0].supported_features).toEqual({ permitted_synthesis_morphing: "ALL" })
   })
 
   it("returns isError:true when the engine is unreachable", async () => {

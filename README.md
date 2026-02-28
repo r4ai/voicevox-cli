@@ -370,35 +370,37 @@ voicevox complete powershell >> $PROFILE
 
 `voicevox mcp` で MCP サーバーを起動すると、以下のツールが利用できます。
 
-| ツール名                         | 説明                                                                              |
-| -------------------------------- | --------------------------------------------------------------------------------- |
-| `list_speakers`                  | 利用可能なスピーカーの一覧を返す                                                  |
-| `get_speaker_info`               | スピーカーの詳細情報（ポリシー・アイコン・音声サンプル）を取得する                |
-| `initialize_speaker`             | スピーカーの音声モデルをメモリに読み込む                                          |
-| `is_initialized_speaker`         | スピーカーが初期化済みかどうかを確認する                                          |
-| `audio_query`                    | テキストの AudioQuery JSON を返す                                                 |
-| `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す                           |
-| `get_accent_phrases`             | テキストからアクセント句を取得する                                                |
-| `get_mora_data`                  | アクセント句から音素の長さと音高を取得する                                        |
-| `get_mora_length`                | アクセント句から音素の長さを取得する                                              |
-| `get_mora_pitch`                 | アクセント句から音高を取得する                                                    |
-| `get_user_dict`                  | ユーザー辞書の全単語を返す                                                        |
-| `add_user_dict_word`             | ユーザー辞書に単語を追加する                                                      |
-| `update_user_dict_word`          | ユーザー辞書の単語を更新する                                                      |
-| `delete_user_dict_word`          | ユーザー辞書の単語を削除する                                                      |
-| `list_presets`                   | プリセット一覧を返す                                                              |
-| `create_audio_query_from_preset` | プリセットを使って AudioQuery を作成する                                          |
-| `validate_kana`                  | AquesTalk 風かな表記が正しいか検証する                                            |
-| `get_morphable_targets`          | 指定スタイルからモーフィング可能なスタイル一覧を取得する                          |
-| `get_engine_info`                | エンジン情報（バージョン・マニフェスト・対応デバイス）を一括取得する              |
-| `get_setting`                    | エンジン設定を取得する                                                            |
-| `update_setting`                 | エンジン設定を更新する                                                            |
-| `list_singers`                   | 歌唱用キャラクターの一覧を返す                                                    |
-| `sing`                           | 楽譜データから歌唱音声を合成して WAV ファイルを保存し、パスを返す                 |
-| `multi_synthesize`               | 複数テキストを一括音声合成して ZIP ファイルを保存し、パスを返す                   |
-| `synthesis_morphing`             | 2スタイル間をモーフィングした音声を合成して WAV ファイルを保存する                |
-| `connect_waves`                  | 複数の WAV ファイルを結合して1つの WAV ファイルを保存し、パスを返す               |
-| `cancellable_synthesize`         | キャンセル可能な合成エンドポイントでテキストを音声合成して WAV ファイルを保存する |
+| ツール名                         | 説明                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `list_speakers`                  | 利用可能なスピーカーの一覧を返す（`include_supported_features` でモーフィング許可情報を追加取得）    |
+| `get_speaker_info`               | `sections` で取得範囲を指定してスピーカー情報を取得する（デフォルト: ポリシーとスタイルアイコン）    |
+| `initialize_speaker`             | スピーカーの音声モデルをメモリに読み込む                                                             |
+| `is_initialized_speaker`         | スピーカーが初期化済みかどうかを確認する                                                             |
+| `audio_query`                    | テキストの AudioQuery JSON を返す                                                                    |
+| `synthesize`                     | テキストを音声合成して WAV ファイルを保存し、パスを返す                                              |
+| `get_accent_phrases`             | テキストからアクセント句を取得する                                                                   |
+| `get_mora_data`                  | アクセント句から音素の長さと音高を取得する                                                           |
+| `get_mora_length`                | アクセント句から音素の長さを取得する                                                                 |
+| `get_mora_pitch`                 | アクセント句から音高を取得する                                                                       |
+| `get_user_dict`                  | ユーザー辞書の単語を返す（`search` / `word_type` でフィルタ、`limit` / `offset` でページネーション） |
+| `add_user_dict_word`             | ユーザー辞書に単語を追加する                                                                         |
+| `update_user_dict_word`          | ユーザー辞書の単語を更新する                                                                         |
+| `delete_user_dict_word`          | ユーザー辞書の単語を削除する                                                                         |
+| `list_presets`                   | プリセット一覧を返す                                                                                 |
+| `create_audio_query_from_preset` | プリセットを使って AudioQuery を作成する                                                             |
+| `validate_kana`                  | AquesTalk 風かな表記が正しいか検証する                                                               |
+| `get_morphable_targets`          | 指定スタイルからモーフィング可能なスタイル ID のリストを取得する                                     |
+| `get_engine_info`                | エンジン情報（バージョン・マニフェスト概要・対応デバイス）を取得する（icon・依存ライセンス等は除外） |
+| `get_engine_licenses`            | エンジンの依存ライブラリのライセンス一覧を取得する                                                   |
+| `get_engine_update_history`      | エンジンの更新履歴を取得する                                                                         |
+| `get_setting`                    | エンジン設定を取得する                                                                               |
+| `update_setting`                 | エンジン設定を更新する                                                                               |
+| `list_singers`                   | 歌唱用キャラクターの一覧を返す（`include_supported_features` でモーフィング許可情報を追加取得）      |
+| `sing`                           | 楽譜データから歌唱音声を合成して WAV ファイルを保存し、パスを返す                                    |
+| `multi_synthesize`               | 複数テキストを一括音声合成して ZIP ファイルを保存し、パスを返す                                      |
+| `synthesis_morphing`             | 2スタイル間をモーフィングした音声を合成して WAV ファイルを保存する                                   |
+| `connect_waves`                  | 複数の WAV ファイルを結合して1つの WAV ファイルを保存し、パスを返す                                  |
+| `cancellable_synthesize`         | キャンセル可能な合成エンドポイントでテキストを音声合成して WAV ファイルを保存する                    |
 
 ### Claude Desktop への設定例
 
