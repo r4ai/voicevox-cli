@@ -10,7 +10,13 @@
 ## 必要環境
 
 - Node.js 24+
-- [VOICEVOX ENGINE](https://github.com/VOICEVOX/voicevox_engine) (デフォルト: `http://localhost:50021`)
+- [VOICEVOX ENGINE](https://github.com/VOICEVOX/voicevox_engine)
+
+> [!important]
+> 本CLIを使うには、VOICEVOX ENGINEが `http://localhost:50021` で起動している必要あります。
+> URLは `--host` オプションで変更可能です。
+>
+> Dockerで起動する方法：[VOICEVOX ENGINE / ユーザーガイド / Docker イメージ](https://github.com/VOICEVOX/voicevox_engine?tab=readme-ov-file#docker-%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8)
 
 ## インストール
 
