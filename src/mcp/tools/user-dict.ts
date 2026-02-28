@@ -71,6 +71,32 @@ export function registerUserDictTools(server: McpServer, defaultHost: string): v
   )
 
   server.registerTool(
+    "export_user_dict",
+    {
+      description:
+        "Export the entire VoiceVox user dictionary as JSON. " +
+        "Returns the complete dictionary in the same format accepted by import_user_dict.",
+      inputSchema: {
+        host: HOST_SCHEMA(defaultHost),
+      },
+    },
+    async (args) => {
+      try {
+        const client = new VoiceVoxClient(args.host)
+        const dict = await client.getUserDict()
+        return {
+          content: [{ type: "text", text: JSON.stringify(dict, null, 2) }],
+        }
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${String(err)}` }],
+          isError: true,
+        }
+      }
+    },
+  )
+
+  server.registerTool(
     "add_user_dict_word",
     {
       description: "Add a word to the VoiceVox user dictionary. Returns the UUID of the new word.",

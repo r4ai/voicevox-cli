@@ -64,6 +64,52 @@ describe("voicevox dict", () => {
     expect(dictAfter).not.toHaveProperty(uuid!)
   })
 
+  it("dict export writes a JSON file importable by dict import", async () => {
+    tmpDir = await makeTmpDir()
+    const exportFile = join(tmpDir, "dict-export.json")
+
+    const addResult = await runCli(
+      "dict",
+      "add",
+      "エクスポートテスト",
+      "エクスポートテスト",
+      "--host",
+      VOICEVOX_HOST,
+    )
+    expect(addResult.exitCode).toBe(0)
+    const uuid = addResult.stdout.match(/Added: (.+)/)?.[1]?.trim()
+    expect(uuid).toBeTruthy()
+
+    const exportResult = await runCli("dict", "export", exportFile, "--host", VOICEVOX_HOST)
+    expect(exportResult.exitCode).toBe(0)
+    expect(exportResult.stdout).toContain(exportFile)
+
+    const { readFile } = await import("node:fs/promises")
+    const raw = await readFile(exportFile, "utf-8")
+    const exported = JSON.parse(raw)
+    expect(exported).toHaveProperty(uuid!)
+    expect(exported[uuid!].surface).toBe("エクスポートテスト")
+
+    const deleteResult = await runCli("dict", "delete", uuid!, "--host", VOICEVOX_HOST)
+    expect(deleteResult.exitCode).toBe(0)
+
+    const importResult = await runCli("dict", "import", exportFile, "--host", VOICEVOX_HOST)
+    expect(importResult.exitCode).toBe(0)
+
+    const { stdout: listStdout, exitCode: listExitCode } = await runCli(
+      "dict",
+      "--host",
+      VOICEVOX_HOST,
+      "--json",
+    )
+    expect(listExitCode).toBe(0)
+    const listedDict = JSON.parse(listStdout)
+    expect(listedDict).toHaveProperty(uuid!)
+    expect(listedDict[uuid!].surface).toBe("エクスポートテスト")
+
+    await runCli("dict", "delete", uuid!, "--host", VOICEVOX_HOST)
+  })
+
   it("dict add with options", async () => {
     const addResult = await runCli(
       "dict",
