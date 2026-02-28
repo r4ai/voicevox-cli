@@ -163,6 +163,49 @@ const dictDeleteCommand = define({
   },
 })
 
+const dictExportCommand = define({
+  name: "export",
+  description: "Export the user dictionary to a JSON file",
+  args: {
+    ...HOST_ARG,
+    indent: {
+      type: "number" as const,
+      default: 2,
+      description: "JSON indentation width",
+    },
+  },
+  run: async (ctx) => {
+    const file = getPositionals(ctx)[0]
+    if (!file) {
+      console.error("Error: file argument is required")
+      console.error("Usage: voicevox dict export <file> [options]")
+      process.exit(1)
+    }
+
+    const host = ctx.values.host ?? "http://localhost:50021"
+    const indent = ctx.values.indent ?? 2
+    const client = new VoiceVoxClient(host)
+
+    let dict
+    try {
+      dict = await client.getUserDict()
+    } catch (err) {
+      handleCommandError(err, host)
+    }
+
+    try {
+      await writeFile(file, JSON.stringify(dict, null, indent), "utf-8")
+    } catch (err) {
+      console.error(
+        `Error: Failed to write file: ${err instanceof Error ? err.message : String(err)}`,
+      )
+      process.exit(1)
+    }
+
+    console.log(`Exported to: ${file}`)
+  },
+})
+
 const dictImportCommand = define({
   name: "import",
   description: "Import a user dictionary from a JSON file",
@@ -223,6 +266,7 @@ export const dictCommand = define({
     add: dictAddCommand,
     update: dictUpdateCommand,
     delete: dictDeleteCommand,
+    export: dictExportCommand,
     import: dictImportCommand,
   },
   run: async (ctx) => {

@@ -172,6 +172,7 @@ voicevox dict --json                   # JSON で出力
 voicevox dict add <surface> <読み>     # 単語を追加
 voicevox dict update <uuid> [options]  # 単語を更新
 voicevox dict delete <uuid>            # 単語を削除
+voicevox dict export <file.json>       # JSON ファイルにエクスポート
 voicevox dict import <file.json>       # JSON ファイルからインポート
 ```
 
@@ -194,6 +195,13 @@ voicevox dict import <file.json>       # JSON ファイルからインポート
 | `--word-type`     | `-t`   | 品詞                   |
 | `--priority`      | `-p`   | 優先度 (0–10)          |
 | `--host`          |        | VOICEVOX ENGINE の URL |
+
+#### `voicevox dict export <file>`
+
+| オプション | デフォルト               | 説明                   |
+| ---------- | ------------------------ | ---------------------- |
+| `--indent` | `2`                      | JSON インデント幅      |
+| `--host`   | `http://localhost:50021` | VOICEVOX ENGINE の URL |
 
 #### `voicevox dict import <file>`
 
@@ -396,6 +404,7 @@ voicevox complete powershell >> $PROFILE
 | `get_mora_length`                | アクセント句から音素の長さを取得する                                                                 |
 | `get_mora_pitch`                 | アクセント句から音高を取得する                                                                       |
 | `get_user_dict`                  | ユーザー辞書の単語を返す（`search` / `word_type` でフィルタ、`limit` / `offset` でページネーション） |
+| `export_user_dict`               | ユーザー辞書全体を `import_user_dict` で再インポート可能な JSON 形式でエクスポートする               |
 | `add_user_dict_word`             | ユーザー辞書に単語を追加する                                                                         |
 | `update_user_dict_word`          | ユーザー辞書の単語を更新する                                                                         |
 | `delete_user_dict_word`          | ユーザー辞書の単語を削除する                                                                         |
