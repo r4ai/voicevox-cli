@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { VoiceVoxClient } from "../../voicevox/client.js"
-import { registerEngineInfoTool } from "./engine-info.js"
+import {
+  registerEngineInfoTool,
+  registerEngineLicensesTool,
+  registerEngineUpdateHistoryTool,
+} from "./engine-info.js"
 
 type ToolHandler = (args: Record<string, unknown>) => Promise<{
   content: { type: string; text: string }[]
@@ -24,12 +28,12 @@ const MOCK_MANIFEST = {
   brand_name: "VOICEVOX",
   uuid: "test-uuid",
   url: "https://example.com",
-  icon: "",
+  icon: "base64icon==",
   default_sampling_rate: 24000,
   frame_rate: 93.75,
   terms_of_service: "",
-  update_infos: [],
-  dependency_licenses: [],
+  update_infos: [{ version: "0.15.0", descriptions: ["Bug fixes"], contributors: ["dev1"] }],
+  dependency_licenses: [{ name: "libfoo", version: "1.0", license: "MIT", text: "MIT License..." }],
   supported_features: {
     adjust_mora_pitch: true,
     adjust_phoneme_length: true,
@@ -42,12 +46,16 @@ const MOCK_MANIFEST = {
   },
 }
 
+// Manifest without the heavy fields (icon, dependency_licenses, update_infos)
+const SLIM_MANIFEST = (({ icon: _i, dependency_licenses: _dl, update_infos: _ui, ...rest }) =>
+  rest)(MOCK_MANIFEST)
+
 describe("MCP get_engine_info", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
   })
 
-  it("returns combined engine info as JSON", async () => {
+  it("returns combined engine info as JSON without heavy fields", async () => {
     vi.spyOn(VoiceVoxClient.prototype, "getVersion").mockResolvedValue("0.15.3")
     vi.spyOn(VoiceVoxClient.prototype, "getCoreVersions").mockResolvedValue(["0.15.3"])
     vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockResolvedValue(MOCK_MANIFEST)
@@ -66,7 +74,10 @@ describe("MCP get_engine_info", () => {
     const parsed = JSON.parse(result.content[0].text)
     expect(parsed.version).toBe("0.15.3")
     expect(parsed.core_versions).toEqual(["0.15.3"])
-    expect(parsed.manifest).toEqual(MOCK_MANIFEST)
+    expect(parsed.manifest).toEqual(SLIM_MANIFEST)
+    expect(parsed.manifest.icon).toBeUndefined()
+    expect(parsed.manifest.dependency_licenses).toBeUndefined()
+    expect(parsed.manifest.update_infos).toBeUndefined()
     expect(parsed.supported_devices).toEqual({ cpu: true, cuda: false, dml: false })
   })
 
@@ -85,6 +96,80 @@ describe("MCP get_engine_info", () => {
 
     expect(result.isError).toBe(true)
     expect(result.content[0].text).toMatch(/Error:/)
+  })
+})
+
+describe("MCP get_engine_licenses", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("returns dependency_licenses from manifest", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockResolvedValue(MOCK_MANIFEST)
+
+    const server = buildMockServer()
+    registerEngineLicensesTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_engine_licenses"]({ host: "http://localhost:50021" })
+
+    expect(result.isError).toBeUndefined()
+    expect(JSON.parse(result.content[0].text)).toEqual(MOCK_MANIFEST.dependency_licenses)
+  })
+
+  it("returns isError:true when engine is unreachable", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockRejectedValue(
+      new Error("GET /engine_manifest failed"),
+    )
+
+    const server = buildMockServer()
+    registerEngineLicensesTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_engine_licenses"]({ host: "http://localhost:50021" })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toMatch(/Error:/)
+  })
+})
+
+describe("MCP get_engine_update_history", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("returns update_infos from manifest", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockResolvedValue(MOCK_MANIFEST)
+
+    const server = buildMockServer()
+    registerEngineUpdateHistoryTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_engine_update_history"]({
+      host: "http://localhost:50021",
+    })
+
+    expect(result.isError).toBeUndefined()
+    expect(JSON.parse(result.content[0].text)).toEqual(MOCK_MANIFEST.update_infos)
+  })
+
+  it("returns isError:true when engine is unreachable", async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getEngineManifest").mockRejectedValue(
+      new Error("GET /engine_manifest failed"),
+    )
+
+    const server = buildMockServer()
+    registerEngineUpdateHistoryTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_engine_update_history"]({
+      host: "http://localhost:50021",
+    })
+
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toMatch(/Error:/)
+  })
+})
+
+describe("MCP get_engine_info (host forwarding)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
   })
 
   it("uses the provided host when calling client methods", async () => {
