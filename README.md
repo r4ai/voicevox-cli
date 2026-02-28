@@ -26,9 +26,16 @@ npm install -g @r4ai/voicevox-cli
 
 # pnpm
 pnpm add -g @r4ai/voicevox-cli
+```
 
-# yarn
-yarn global add @r4ai/voicevox-cli
+インストールなしで使う方法：
+
+```bash
+# npm
+npx @r4ai/voicevox-cli
+
+# pnpm
+pnpx @r4ai/voicevox-cli
 ```
 
 ## CLI
@@ -408,6 +415,21 @@ voicevox complete powershell >> $PROFILE
 | `connect_waves`                  | 複数の WAV ファイルを結合して1つの WAV ファイルを保存し、パスを返す                                  |
 | `cancellable_synthesize`         | キャンセル可能な合成エンドポイントでテキストを音声合成して WAV ファイルを保存する                    |
 
+### Claude Code への設定例
+
+`.mcp.json` に以下を追加します。
+
+```json
+{
+  "mcpServers": {
+    "voicevox": {
+      "command": "npx",
+      "args": ["@r4ai/voicevox-cli", "mcp"]
+    }
+  }
+}
+```
+
 ### Claude Desktop への設定例
 
 `claude_desktop_config.json` に以下を追加します。
@@ -416,8 +438,8 @@ voicevox complete powershell >> $PROFILE
 {
   "mcpServers": {
     "voicevox": {
-      "command": "voicevox",
-      "args": ["mcp"]
+      "command": "npx",
+      "args": ["@r4ai/voicevox-cli", "mcp"]
     }
   }
 }
