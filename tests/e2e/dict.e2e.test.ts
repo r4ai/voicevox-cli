@@ -90,6 +90,23 @@ describe("voicevox dict", () => {
     expect(exported).toHaveProperty(uuid!)
     expect(exported[uuid!].surface).toBe("エクスポートテスト")
 
+    const deleteResult = await runCli("dict", "delete", uuid!, "--host", VOICEVOX_HOST)
+    expect(deleteResult.exitCode).toBe(0)
+
+    const importResult = await runCli("dict", "import", exportFile, "--host", VOICEVOX_HOST)
+    expect(importResult.exitCode).toBe(0)
+
+    const { stdout: listStdout, exitCode: listExitCode } = await runCli(
+      "dict",
+      "--host",
+      VOICEVOX_HOST,
+      "--json",
+    )
+    expect(listExitCode).toBe(0)
+    const listedDict = JSON.parse(listStdout)
+    expect(listedDict).toHaveProperty(uuid!)
+    expect(listedDict[uuid!].surface).toBe("エクスポートテスト")
+
     await runCli("dict", "delete", uuid!, "--host", VOICEVOX_HOST)
   })
 
