@@ -14,17 +14,46 @@ export function registerUserDictTools(server: McpServer, defaultHost: string): v
   server.registerTool(
     "get_user_dict",
     {
-      description: "Get all words in the VoiceVox user dictionary",
+      description:
+        "Get words in the VoiceVox user dictionary. Supports filtering by surface text and word type, " +
+        "and pagination via limit/offset. Returns { words, total, has_more }.",
       inputSchema: {
         host: HOST_SCHEMA(defaultHost),
+        search: z
+          .string()
+          .optional()
+          .describe("Partial match filter for surface form (the word as written)"),
+        word_type: z
+          .enum(["PROPER_NOUN", "COMMON_NOUN", "VERB", "ADJECTIVE", "SUFFIX"])
+          .optional()
+          .describe("Filter by word type"),
+        limit: z.number().int().min(1).max(1000).default(100).describe("Maximum words to return"),
+        offset: z.number().int().min(0).default(0).describe("Number of words to skip"),
       },
     },
     async (args) => {
       try {
         const client = new VoiceVoxClient(args.host)
         const dict = await client.getUserDict()
+
+        let words = Object.entries(dict).map(([uuid, word]) => ({ uuid, ...word }))
+
+        if (args.search) {
+          const q = args.search.toLowerCase()
+          words = words.filter((w) => w.surface.toLowerCase().includes(q))
+        }
+        if (args.word_type) {
+          words = words.filter((w) => w.word_type === args.word_type)
+        }
+
+        const total = words.length
+        const sliced = words.slice(args.offset, args.offset + args.limit)
+        const has_more = args.offset + sliced.length < total
+
         return {
-          content: [{ type: "text", text: JSON.stringify(dict, null, 2) }],
+          content: [
+            { type: "text", text: JSON.stringify({ words: sliced, total, has_more }, null, 2) },
+          ],
         }
       } catch (err) {
         return {

@@ -24,10 +24,10 @@ describe("MCP get_morphable_targets", () => {
     vi.restoreAllMocks()
   })
 
-  it("passes base style IDs to the client and returns style-indexed results", async () => {
+  it("passes base style IDs to the client and returns morphable_style_ids", async () => {
     const mockResult: Record<string, MorphableTargetInfo>[] = [
-      { "1": { is_morphable: true } },
-      { "2": { is_morphable: false } },
+      { "1": { is_morphable: true }, "3": { is_morphable: false } },
+      { "2": { is_morphable: false }, "4": { is_morphable: true } },
     ]
     vi.spyOn(VoiceVoxClient.prototype, "getMorphableTargets").mockResolvedValue(mockResult)
 
@@ -42,8 +42,8 @@ describe("MCP get_morphable_targets", () => {
 
     expect(result.isError).toBeUndefined()
     expect(JSON.parse(result.content[0].text)).toEqual([
-      { base_style_id: 100, targets: mockResult[0] },
-      { base_style_id: 200, targets: mockResult[1] },
+      { base_style_id: 100, morphable_style_ids: [1] },
+      { base_style_id: 200, morphable_style_ids: [4] },
     ])
     expect(VoiceVoxClient.prototype.getMorphableTargets).toHaveBeenCalledWith([100, 200], {
       coreVersion: undefined,

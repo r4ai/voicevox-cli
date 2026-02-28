@@ -139,6 +139,24 @@ export interface SpeakerInfo {
   style_infos: StyleInfo[]
 }
 
+export type SpeakerInfoSection =
+  | "policy"
+  | "portrait"
+  | "style_icons"
+  | "style_portraits"
+  | "voice_samples"
+
+export type PartialSpeakerInfo = {
+  policy?: string
+  portrait?: string
+  style_infos?: Array<{
+    id: number
+    icon?: string
+    portrait?: string
+    voice_samples?: string[]
+  }>
+}
+
 export type CorsPolicyMode = "localapps" | "all"
 
 export interface EngineSetting {

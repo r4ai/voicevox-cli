@@ -63,7 +63,9 @@ export function registerUtilityTools(server: McpServer, defaultHost: string): vo
         })
         const mappedResult = args.base_style_ids.map((styleId, index) => ({
           base_style_id: styleId,
-          targets: result[index] ?? {},
+          morphable_style_ids: Object.entries(result[index] ?? {})
+            .filter(([, info]) => info.is_morphable)
+            .map(([id]) => Number(id)),
         }))
         return {
           content: [{ type: "text", text: JSON.stringify(mappedResult, null, 2) }],

@@ -37,17 +37,29 @@ export function registerListSingersTool(server: McpServer, defaultHost: string):
   server.registerTool(
     "list_singers",
     {
-      description: "List available VoiceVox singers and their styles for song synthesis",
+      description:
+        "List available VoiceVox singers and their styles for song synthesis. " +
+        "supported_features (morphing permissions) are omitted by default to keep the response compact. " +
+        "Set include_supported_features=true to include them.",
       inputSchema: {
         host: z.string().default(defaultHost).describe("VoiceVox engine URL"),
+        include_supported_features: z
+          .boolean()
+          .default(false)
+          .describe(
+            "Include supported_features (e.g. permitted_synthesis_morphing) in each singer",
+          ),
       },
     },
     async (args) => {
       try {
         const client = new VoiceVoxClient(args.host)
         const singers = await client.getSingers()
+        const result = args.include_supported_features
+          ? singers
+          : singers.map(({ supported_features: _sf, ...rest }) => rest)
         return {
-          content: [{ type: "text", text: JSON.stringify(singers, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         }
       } catch (err) {
         return {

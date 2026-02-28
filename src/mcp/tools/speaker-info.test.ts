@@ -25,6 +25,7 @@ const MOCK_SPEAKER_INFO = {
     {
       id: 0,
       icon: "base64encodedicon==",
+      portrait: "base64styleportrait==",
       voice_samples: ["base64sample1==", "base64sample2=="],
     },
   ],
@@ -35,26 +36,92 @@ describe("MCP get_speaker_info", () => {
     vi.restoreAllMocks()
   })
 
-  it("returns speaker info as JSON", async () => {
+  it("returns only policy and style_icons by default (no portrait, no voice_samples)", async () => {
     vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
 
     const server = buildMockServer()
     registerSpeakerInfoTool(server as never, "http://localhost:50021")
 
-    // The real MCP SDK applies the Zod schema before calling the handler,
-    // so resource_format defaults to "base64" when not provided by the caller.
+    // Default: sections=["policy", "style_icons"], resource_format="url"
     const result = await server.tools["get_speaker_info"]({
       host: "http://localhost:50021",
       speaker_uuid: "test-uuid",
-      resource_format: "base64",
+      sections: ["policy", "style_icons"],
+      resource_format: "url",
     })
 
     expect(result.isError).toBeUndefined()
-    expect(JSON.parse(result.content[0].text)).toEqual(MOCK_SPEAKER_INFO)
-    expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("test-uuid", "base64")
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.policy).toBe(MOCK_SPEAKER_INFO.policy)
+    expect(parsed.portrait).toBeUndefined()
+    expect(parsed.style_infos).toHaveLength(1)
+    expect(parsed.style_infos[0].icon).toBe(MOCK_SPEAKER_INFO.style_infos[0].icon)
+    expect(parsed.style_infos[0].voice_samples).toBeUndefined()
+    expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("test-uuid", "url")
   })
 
-  it("passes resource_format to client when specified", async () => {
+  it('returns only policy text when sections=["policy"]', async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
+
+    const server = buildMockServer()
+    registerSpeakerInfoTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_speaker_info"]({
+      host: "http://localhost:50021",
+      speaker_uuid: "uuid-1",
+      sections: ["policy"],
+      resource_format: "url",
+    })
+
+    expect(result.isError).toBeUndefined()
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.policy).toBe(MOCK_SPEAKER_INFO.policy)
+    expect(parsed.portrait).toBeUndefined()
+    expect(parsed.style_infos).toBeUndefined()
+  })
+
+  it('returns portrait when sections=["portrait"]', async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
+
+    const server = buildMockServer()
+    registerSpeakerInfoTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_speaker_info"]({
+      host: "http://localhost:50021",
+      speaker_uuid: "uuid-1",
+      sections: ["portrait"],
+      resource_format: "url",
+    })
+
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.portrait).toBe(MOCK_SPEAKER_INFO.portrait)
+    expect(parsed.policy).toBeUndefined()
+    expect(parsed.style_infos).toBeUndefined()
+  })
+
+  it('returns voice_samples only in style_infos when sections=["voice_samples"]', async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
+
+    const server = buildMockServer()
+    registerSpeakerInfoTool(server as never, "http://localhost:50021")
+
+    const result = await server.tools["get_speaker_info"]({
+      host: "http://localhost:50021",
+      speaker_uuid: "uuid-1",
+      sections: ["voice_samples"],
+      resource_format: "base64",
+    })
+
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.style_infos).toHaveLength(1)
+    expect(parsed.style_infos[0].voice_samples).toEqual(
+      MOCK_SPEAKER_INFO.style_infos[0].voice_samples,
+    )
+    expect(parsed.style_infos[0].icon).toBeUndefined()
+    expect(parsed.portrait).toBeUndefined()
+  })
+
+  it("passes resource_format=base64 to client when specified", async () => {
     vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
 
     const server = buildMockServer()
@@ -63,10 +130,11 @@ describe("MCP get_speaker_info", () => {
     await server.tools["get_speaker_info"]({
       host: "http://localhost:50021",
       speaker_uuid: "uuid-1",
-      resource_format: "url",
+      sections: ["policy"],
+      resource_format: "base64",
     })
 
-    expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("uuid-1", "url")
+    expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("uuid-1", "base64")
   })
 
   it("returns isError:true when the engine is unreachable", async () => {
@@ -80,6 +148,8 @@ describe("MCP get_speaker_info", () => {
     const result = await server.tools["get_speaker_info"]({
       host: "http://localhost:50021",
       speaker_uuid: "test-uuid",
+      sections: ["policy"],
+      resource_format: "url",
     })
 
     expect(result.isError).toBe(true)
@@ -97,6 +167,8 @@ describe("MCP get_speaker_info", () => {
     await server.tools["get_speaker_info"]({
       host: "http://custom-host:9999",
       speaker_uuid: "uuid-x",
+      sections: ["policy"],
+      resource_format: "url",
     })
 
     const calledUrls = fetchMock.mock.calls.map(([url]) => String(url))
