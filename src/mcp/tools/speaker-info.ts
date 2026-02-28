@@ -23,6 +23,7 @@ export function registerSpeakerInfoTool(server: McpServer, defaultHost: string):
         speaker_uuid: z.string().describe("Speaker UUID from list_speakers"),
         sections: z
           .array(SPEAKER_INFO_SECTION_SCHEMA)
+          .min(1, { message: "At least one section must be specified" })
           .default(["policy", "style_icons"])
           .describe(
             "Sections to include in the response. " +
@@ -40,9 +41,16 @@ export function registerSpeakerInfoTool(server: McpServer, defaultHost: string):
     },
     async (args) => {
       try {
-        const client = new VoiceVoxClient(args.host)
-        const info = await client.getSpeakerInfo(args.speaker_uuid, args.resource_format)
         const sections = args.sections as SpeakerInfoSection[]
+        const hasResourceSections =
+          sections.includes("portrait") ||
+          sections.includes("style_icons") ||
+          sections.includes("style_portraits") ||
+          sections.includes("voice_samples")
+
+        const effectiveResourceFormat = hasResourceSections ? args.resource_format : "url"
+        const client = new VoiceVoxClient(args.host)
+        const info = await client.getSpeakerInfo(args.speaker_uuid, effectiveResourceFormat)
 
         const hasStyleInfo =
           sections.includes("style_icons") ||

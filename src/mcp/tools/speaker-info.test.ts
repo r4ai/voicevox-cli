@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { z } from "zod"
 import { VoiceVoxClient } from "../../voicevox/client.js"
 import { registerSpeakerInfoTool } from "./speaker-info.js"
 
@@ -9,11 +10,14 @@ type ToolHandler = (args: Record<string, unknown>) => Promise<{
 
 function buildMockServer() {
   const tools: Record<string, ToolHandler> = {}
+  const schemas: Record<string, unknown> = {}
   const server = {
     registerTool: (_name: string, _schema: unknown, handler: ToolHandler) => {
       tools[_name] = handler
+      schemas[_name] = _schema
     },
     tools,
+    schemas,
   }
   return server
 }
@@ -130,11 +134,27 @@ describe("MCP get_speaker_info", () => {
     await server.tools["get_speaker_info"]({
       host: "http://localhost:50021",
       speaker_uuid: "uuid-1",
-      sections: ["policy"],
+      sections: ["voice_samples"],
       resource_format: "base64",
     })
 
     expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("uuid-1", "base64")
+  })
+
+  it('forces resource_format="url" when sections do not request resources', async () => {
+    vi.spyOn(VoiceVoxClient.prototype, "getSpeakerInfo").mockResolvedValue(MOCK_SPEAKER_INFO)
+
+    const server = buildMockServer()
+    registerSpeakerInfoTool(server as never, "http://localhost:50021")
+
+    await server.tools["get_speaker_info"]({
+      host: "http://localhost:50021",
+      speaker_uuid: "uuid-1",
+      sections: ["policy"],
+      resource_format: "base64",
+    })
+
+    expect(VoiceVoxClient.prototype.getSpeakerInfo).toHaveBeenCalledWith("uuid-1", "url")
   })
 
   it("returns isError:true when the engine is unreachable", async () => {
@@ -173,5 +193,24 @@ describe("MCP get_speaker_info", () => {
 
     const calledUrls = fetchMock.mock.calls.map(([url]) => String(url))
     expect(calledUrls.every((u) => u.startsWith("http://custom-host:9999"))).toBe(true)
+  })
+
+  it("rejects an explicit empty sections array at schema level", () => {
+    const server = buildMockServer()
+    registerSpeakerInfoTool(server as never, "http://localhost:50021")
+
+    const toolSchema = server.schemas["get_speaker_info"] as {
+      inputSchema: Record<string, z.ZodTypeAny>
+    }
+    const parser = z.object(toolSchema.inputSchema)
+
+    expect(() =>
+      parser.parse({
+        host: "http://localhost:50021",
+        speaker_uuid: "uuid-1",
+        sections: [],
+        resource_format: "url",
+      }),
+    ).toThrow(/At least one section must be specified/)
   })
 })

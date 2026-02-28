@@ -46,6 +46,12 @@ export function registerUserDictTools(server: McpServer, defaultHost: string): v
           words = words.filter((w) => w.word_type === args.word_type)
         }
 
+        words.sort((a, b) => {
+          const surfaceCmp = a.surface.localeCompare(b.surface)
+          if (surfaceCmp !== 0) return surfaceCmp
+          return a.uuid.localeCompare(b.uuid)
+        })
+
         const total = words.length
         const sliced = words.slice(args.offset, args.offset + args.limit)
         const has_more = args.offset + sliced.length < total
