@@ -34,8 +34,10 @@ export const validateKanaCommand = define({
     if (result === true) {
       console.log("Valid AquesTalk-style kana notation.")
     } else {
-      console.error(`Invalid kana: ${result.error_name}`)
-      console.error(JSON.stringify(result.error_args, null, 2))
+      const errorName = result.error_name || "UNKNOWN_ERROR"
+      const errorArgs = result.error_args ?? {}
+      console.error(`Invalid kana: ${errorName}`)
+      console.error(JSON.stringify(errorArgs, null, 2))
       process.exit(1)
     }
   },

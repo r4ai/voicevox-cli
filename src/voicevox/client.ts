@@ -33,6 +33,30 @@ export type EngineSettingUpdate = Pick<EngineSetting, "cors_policy_mode"> & {
 export class VoiceVoxClient {
   constructor(private readonly baseUrl: string) {}
 
+  private normalizeParseKanaError(payload: unknown): ParseKanaBadRequest {
+    if (typeof payload !== "object" || payload === null) {
+      return { error_name: "UNKNOWN_ERROR", error_args: {} }
+    }
+
+    const normalized = "detail" in payload ? (payload.detail as unknown) : payload
+    if (typeof normalized !== "object" || normalized === null) {
+      return { error_name: "UNKNOWN_ERROR", error_args: {} }
+    }
+
+    const errorName =
+      "error_name" in normalized && typeof normalized.error_name === "string"
+        ? normalized.error_name
+        : "UNKNOWN_ERROR"
+    const errorArgs =
+      "error_args" in normalized &&
+      typeof normalized.error_args === "object" &&
+      normalized.error_args !== null
+        ? (normalized.error_args as Record<string, unknown>)
+        : {}
+
+    return { error_name: errorName, error_args: errorArgs }
+  }
+
   private setCoreVersion(url: URL, coreVersion?: string): void {
     if (coreVersion !== undefined) url.searchParams.set("core_version", coreVersion)
   }
@@ -312,7 +336,7 @@ export class VoiceVoxClient {
     url.searchParams.set("text", text)
     const res = await fetch(url, { method: "POST" })
     if (res.status === 200) return true
-    if (res.status === 400) return res.json() as Promise<ParseKanaBadRequest>
+    if (res.status === 400) return this.normalizeParseKanaError(await res.json())
     throw new Error(`POST /validate_kana failed: ${res.status} ${res.statusText}`)
   }
 
