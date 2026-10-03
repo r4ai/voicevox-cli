@@ -1,7 +1,33 @@
-import { describe, expect, it } from "vitest"
-import { runCli, VOICEVOX_HOST } from "./helpers.js"
+import { afterEach, describe, expect, it } from "vitest"
+import { runCli as runCliBase, VOICEVOX_HOST } from "./helpers.js"
 
 describe("voicevox presets", () => {
+  const createdPresets = new Set<number>()
+  const runCli = async (...args: string[]) => {
+    const result = await runCliBase(...args)
+    if (args[0] === "presets" && args[1] === "add") {
+      const id = result.stdout.match(/Added preset: id=(\d+)/)?.[1]
+      if (id !== undefined) createdPresets.add(Number(id))
+    }
+    return result
+  }
+
+  afterEach(async () => {
+    try {
+      if (createdPresets.size === 0) return
+      const response = await fetch(`${VOICEVOX_HOST}/presets`)
+      expect(response.ok).toBe(true)
+      const presets = (await response.json()) as { id: number }[]
+      for (const id of createdPresets) {
+        if (!presets.some((preset) => preset.id === id)) continue
+        const result = await runCliBase("presets", "delete", String(id), "--host", VOICEVOX_HOST)
+        expect(result.exitCode).toBe(0)
+      }
+    } finally {
+      createdPresets.clear()
+    }
+  })
+
   it("lists presets", async () => {
     const { exitCode } = await runCli("presets", "--host", VOICEVOX_HOST)
     expect(exitCode).toBe(0)

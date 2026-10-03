@@ -17,19 +17,35 @@ describe("voicevox setting", () => {
   })
 
   it("updates setting with 'set' subcommand and restores", async () => {
-    const updateResult = await runCli(
-      "setting",
-      "set",
-      "--cors-policy-mode",
-      "all",
-      "--host",
-      VOICEVOX_HOST,
-    )
-    expect(updateResult.exitCode).toBe(0)
-    expect(updateResult.stdout).toMatch(/Updated setting:/)
-    expect(updateResult.stdout).toMatch(/cors_policy_mode:\s+all/)
+    const originalResult = await runCli("setting", "--host", VOICEVOX_HOST, "--json")
+    expect(originalResult.exitCode).toBe(0)
+    const original = JSON.parse(originalResult.stdout)
 
-    // Restore
-    await runCli("setting", "set", "--cors-policy-mode", "localapps", "--host", VOICEVOX_HOST)
+    try {
+      const updateResult = await runCli(
+        "setting",
+        "set",
+        "--cors-policy-mode",
+        "localapps",
+        "--host",
+        VOICEVOX_HOST,
+      )
+      expect(updateResult.exitCode).toBe(0)
+      expect(updateResult.stdout).toMatch(/Updated setting:/)
+      expect(updateResult.stdout).toMatch(/cors_policy_mode:\s+localapps/)
+    } finally {
+      const restored = await runCli(
+        "setting",
+        "set",
+        "--cors-policy-mode",
+        original.cors_policy_mode,
+        "--host",
+        VOICEVOX_HOST,
+      )
+      expect(restored.exitCode).toBe(0)
+      const result = await runCli("setting", "--host", VOICEVOX_HOST, "--json")
+      expect(result.exitCode).toBe(0)
+      expect(JSON.parse(result.stdout)).toEqual(original)
+    }
   })
 })

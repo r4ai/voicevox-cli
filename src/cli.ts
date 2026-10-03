@@ -1,5 +1,6 @@
 import completion from "@gunshi/plugin-completion"
 import { cli, define } from "gunshi"
+import { normalizeCliArgs } from "./argv.js"
 import { accentPhrasesCommand } from "./commands/accent-phrases.js"
 import { dictCommand } from "./commands/dict.js"
 import { infoCommand } from "./commands/info.js"
@@ -22,28 +23,30 @@ const entryCommand = define({
   description: "VoiceVox CLI — synthesize Japanese text to speech",
 })
 
-await cli(process.argv.slice(2), entryCommand, {
+const subCommands = {
+  speak: speakCommand,
+  speakers: speakersCommand,
+  singers: singersCommand,
+  "speaker-info": speakerInfoCommand,
+  "initialize-speaker": initializeSpeakerCommand,
+  "is-initialized-speaker": isInitializedSpeakerCommand,
+  query: queryCommand,
+  "accent-phrases": accentPhrasesCommand,
+  dict: dictCommand,
+  presets: presetsCommand,
+  "validate-kana": validateKanaCommand,
+  "morphable-targets": morphableTargetsCommand,
+  version: versionCommand,
+  info: infoCommand,
+  setting: settingCommand,
+  mcp: mcpCommand,
+}
+
+await cli(normalizeCliArgs(process.argv.slice(2), subCommands), entryCommand, {
   name: "voicevox",
   version: process.env.PKG_VERSION ?? "0.0.0",
   description: "VoiceVox CLI — synthesize Japanese text to speech",
   renderHeader: null,
   plugins: [completion()],
-  subCommands: {
-    speak: speakCommand,
-    speakers: speakersCommand,
-    singers: singersCommand,
-    "speaker-info": speakerInfoCommand,
-    "initialize-speaker": initializeSpeakerCommand,
-    "is-initialized-speaker": isInitializedSpeakerCommand,
-    query: queryCommand,
-    "accent-phrases": accentPhrasesCommand,
-    dict: dictCommand,
-    presets: presetsCommand,
-    "validate-kana": validateKanaCommand,
-    "morphable-targets": morphableTargetsCommand,
-    version: versionCommand,
-    info: infoCommand,
-    setting: settingCommand,
-    mcp: mcpCommand,
-  },
+  subCommands,
 })

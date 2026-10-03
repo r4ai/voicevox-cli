@@ -1,13 +1,37 @@
 import { writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
-import { cleanDir, makeTmpDir, runCli, VOICEVOX_HOST } from "./helpers.js"
+import { cleanDir, makeTmpDir, runCli as runCliBase, VOICEVOX_HOST } from "./helpers.js"
 
 describe("voicevox dict", () => {
   let tmpDir: string
+  const createdWords = new Set<string>()
+
+  const runCli = async (...args: string[]) => {
+    const result = await runCliBase(...args)
+    if (args[0] === "dict" && args[1] === "add") {
+      const uuid = result.stdout.match(/Added: (.+)/)?.[1]?.trim()
+      if (uuid) createdWords.add(uuid)
+    }
+    return result
+  }
 
   afterEach(async () => {
-    if (tmpDir) await cleanDir(tmpDir)
+    try {
+      if (createdWords.size > 0) {
+        const response = await fetch(`${VOICEVOX_HOST}/user_dict`)
+        expect(response.ok).toBe(true)
+        const words = await response.json()
+        for (const uuid of createdWords) {
+          if (!(uuid in words)) continue
+          const result = await runCliBase("dict", "delete", uuid, "--host", VOICEVOX_HOST)
+          expect(result.exitCode).toBe(0)
+        }
+      }
+    } finally {
+      createdWords.clear()
+      if (tmpDir) await cleanDir(tmpDir)
+    }
   })
 
   it("lists user dictionary", async () => {
