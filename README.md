@@ -458,10 +458,18 @@ voicevox complete powershell >> $PROFILE
 
 `.tool-versions` を使う場合は `asdf install` または `mise install` で Node.js を揃えてください。
 
+`package.json` の `packageManager` に固定した pnpm 11 を使ってください。
+
 ```bash
-pnpm install
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm audit signatures
+pnpm rebuild
 pnpm build
 ```
+
+依存バージョンを固定し、`pnpm-workspace.yaml` で公開から7日以内のリリース、出所の証明が弱くなる更新、間接依存の Git・直接 URL を制限しています。インストールスクリプトはレビューしたバージョンの esbuild と lefthook のみ許可します。CI でも署名検証後にスクリプトを実行し、`pnpm audit` で既知の脆弱性を確認します。
+
+`chokidar@4.0.3` は tsup が必要とする旧リリースです。署名と既存ロックファイルの integrity が一致することを確認し、provenance の制限のみバージョン限定で例外にしています。esbuild は [GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr) の修正版へ固定しています。
 
 ```bash
 pnpm dev        # ウォッチモードでビルド

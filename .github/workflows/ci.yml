@@ -10,6 +10,14 @@ permissions:
   contents: read
 
 jobs:
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-pnpm
+      - run: pnpm audit
+
   build:
     name: Build
     runs-on: ubuntu-latest

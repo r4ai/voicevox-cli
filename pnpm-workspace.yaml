@@ -1,0 +1,17 @@
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+saveExact: true
+strictDepBuilds: true
+verifyDepsBeforeRun: error
+# tsup requires chokidar 4; 4.0.3 lacks provenance present in earlier releases.
+# Registry signature and unchanged integrity reviewed; keep this exception exact.
+trustPolicyExclude:
+  - chokidar@4.0.3
+# GHSA-g7r4-m6w7-qqqr is fixed in esbuild >=0.28.1.
+overrides:
+  esbuild: 0.28.2
+# Only the reviewed versions may execute installation scripts.
+allowBuilds:
+  esbuild@0.28.2: true
+  lefthook@2.1.14: true
