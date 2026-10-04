@@ -23,6 +23,24 @@ describe("VoiceVoxClient.validateKana", () => {
     expect(result).toEqual(errorBody)
   })
 
+  it("returns unwrapped detail error object on 400", async () => {
+    const errorBody = { error_name: "UNKNOWN_TEXT", error_args: { text: "kon" } }
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          detail: {
+            text: "判別できない読み仮名があります: kon",
+            ...errorBody,
+          },
+        }),
+        { status: 400 },
+      ),
+    )
+    const client = new VoiceVoxClient("http://localhost:50021")
+    const result = await client.validateKana("kon")
+    expect(result).toEqual(errorBody)
+  })
+
   it("throws on other status codes", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("", { status: 500, statusText: "Internal Server Error" }),
